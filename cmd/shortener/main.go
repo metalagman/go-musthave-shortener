@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -74,11 +75,13 @@ func Shortener(w http.ResponseWriter, r *http.Request) {
 		}
 		http.Redirect(w, r, u, http.StatusTemporaryRedirect)
 	case http.MethodPost:
-		if err := r.ParseForm(); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			log.Printf("Error reading body: %v", err)
+			http.Error(w, "can't read body", http.StatusBadRequest)
 			return
 		}
-		u := r.FormValue("url")
+		u := string(body)
 		if !IsUrl(u) {
 			http.Error(w, "bad url", http.StatusBadRequest)
 			return
