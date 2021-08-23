@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"sync"
@@ -57,25 +58,37 @@ func (svc *ShortenerService) read(id string) (string, error) {
 	}
 }
 
+func IsUrl(str string) bool {
+	u, err := url.Parse(str)
+	return err == nil && u.Scheme != "" && u.Host != ""
+}
+
 func Shortener(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		id := strings.TrimPrefix(r.URL.Path, "/")
-		url, err := shortener.read(id)
+		u, err := shortener.read(id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
 		}
-		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+		http.Redirect(w, r, u, http.StatusTemporaryRedirect)
 	case http.MethodPost:
 		if err := r.ParseForm(); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		url := r.FormValue("url")
-		id, err := shortener.write(url)
+		u := r.FormValue("url")
+		if !IsUrl(u) {
+			http.Error(w, "bad url", http.StatusBadRequest)
+			return
+		}
+		id, err := shortener.write(u)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
 		}
+		w.WriteHeader(201)
 		_, _ = w.Write([]byte(id))
 	default:
 		http.Error(w, "Method not allowed", http.StatusBadRequest)
