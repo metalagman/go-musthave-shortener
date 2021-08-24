@@ -13,19 +13,6 @@ func IsUrl(str string) bool {
 	return err == nil && u.Scheme != "" && u.Host != ""
 }
 
-func RouterHandler(svc ShortenerService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodGet:
-			ReadHandler(svc)
-		case http.MethodPost:
-			WriteHandler(svc)
-		default:
-			http.Error(w, "Method not allowed", http.StatusBadRequest)
-		}
-	}
-}
-
 func ReadHandler(svc ShortenerService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := strings.TrimPrefix(r.URL.Path, "/")
