@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func isUrl(str string) bool {
+func IsUrl(str string) bool {
 	u, err := url.Parse(str)
 	return err == nil && u.Scheme != "" && u.Host != ""
 }
@@ -47,7 +47,7 @@ func WriteHandler(svc ShortenerService) http.HandlerFunc {
 			return
 		}
 		u := string(body)
-		if !isUrl(u) {
+		if !IsUrl(u) {
 			http.Error(w, "bad url", http.StatusBadRequest)
 			return
 		}
