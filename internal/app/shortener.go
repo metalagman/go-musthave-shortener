@@ -43,12 +43,12 @@ func (svc *MemoryShortenerService) Write(url string) (string, error) {
 }
 
 func (svc *MemoryShortenerService) Read(id string) (string, error) {
-	intId, err := strconv.ParseUint(id, svc.base, 64)
+	intID, err := strconv.ParseUint(id, svc.base, 64)
 	if err != nil {
 		return "", err
 	}
 	svc.Lock()
-	val, ok := svc.urls[intId]
+	val, ok := svc.urls[intID]
 	svc.Unlock()
 	if ok {
 		return val, nil

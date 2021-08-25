@@ -33,7 +33,7 @@ func TestReadHandler(t *testing.T) {
 	type want struct {
 		code        int
 		response    string
-		redirectUrl string
+		redirectURL string
 	}
 
 	svcMock := &ShortenerServiceMock{}
@@ -54,7 +54,7 @@ func TestReadHandler(t *testing.T) {
 			},
 			want{
 				code:        http.StatusTemporaryRedirect,
-				redirectUrl: "https://example.org",
+				redirectURL: "https://example.org",
 			},
 		},
 		{
@@ -96,16 +96,17 @@ func TestReadHandler(t *testing.T) {
 				tt.want.code,
 				w.Code,
 			)
-			if len(tt.want.redirectUrl) > 0 {
+			if len(tt.want.redirectURL) > 0 {
 				assert.Equal(
 					t,
-					tt.want.redirectUrl,
+					tt.want.redirectURL,
 					res.Header.Get("Location"),
 					"Expected location header %s, got %s",
-					tt.want.redirectUrl,
+					tt.want.redirectURL,
 					res.Header.Get("Location"),
 				)
 			}
+			_ = res.Body.Close()
 		})
 	}
 }
@@ -192,6 +193,7 @@ func TestWriteHandler(t *testing.T) {
 				tt.want.body,
 				string(resBody),
 			)
+			_ = res.Body.Close()
 		})
 	}
 }
@@ -229,7 +231,7 @@ func Test_IsUrl(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := IsUrl(tt.args.str); got != tt.want {
+			if got := IsURL(tt.args.str); got != tt.want {
 				t.Errorf("isUrl() = %v, want %v", got, tt.want)
 			}
 		})
