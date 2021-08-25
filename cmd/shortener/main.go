@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/russianlagman/go-musthave-shortener/internal/app"
@@ -16,6 +15,6 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Get("/{id:[0-9a-z]+}", app.ReadHandler(shortener))
 	r.Post("/", app.WriteHandler(shortener))
-	fmt.Printf("Listening on %s\n", addr)
+	log.Printf("Listening on %s\n", addr)
 	log.Fatal(http.ListenAndServe(addr, r))
 }
