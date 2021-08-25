@@ -1,8 +1,8 @@
 package app
 
 import (
+	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -29,8 +29,7 @@ func WriteHandler(svc ShortenerService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			log.Printf("Error reading body: %v", err)
-			http.Error(w, "can't read body", http.StatusBadRequest)
+			http.Error(w, fmt.Sprintf("error reading body: %v", err), http.StatusBadRequest)
 			return
 		}
 		u := string(body)

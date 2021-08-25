@@ -34,11 +34,14 @@ func (svc *MemoryShortenerService) Write(url string) (string, error) {
 	if len(url) == 0 {
 		return "", errors.New("empty url")
 	}
+
 	svc.Lock()
+	defer svc.Unlock()
+
 	svc.counter++
 	svc.urls[svc.counter] = url
 	id := strconv.FormatUint(svc.counter, svc.base)
-	svc.Unlock()
+
 	return fmt.Sprintf("http://%s/%s", svc.addr, id), nil
 }
 
@@ -47,12 +50,13 @@ func (svc *MemoryShortenerService) Read(id string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	svc.Lock()
-	val, ok := svc.urls[intID]
-	svc.Unlock()
-	if ok {
+	defer svc.Unlock()
+
+	if val, ok := svc.urls[intID]; ok {
 		return val, nil
-	} else {
-		return "", errors.New("not found")
 	}
+
+	return "", errors.New("not found")
 }
