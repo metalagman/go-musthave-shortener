@@ -15,12 +15,12 @@ type ShortenerServiceMock struct {
 	mock.Mock
 }
 
-func (m *ShortenerServiceMock) Write(url string) (string, error) {
+func (m *ShortenerServiceMock) WriteURL(url string) (string, error) {
 	args := m.Called(url)
 	return args.String(0), args.Error(1)
 }
 
-func (m *ShortenerServiceMock) Read(id string) (string, error) {
+func (m *ShortenerServiceMock) ReadURL(id string) (string, error) {
 	args := m.Called(id)
 	return args.String(0), args.Error(1)
 }
@@ -37,9 +37,9 @@ func TestReadHandler(t *testing.T) {
 	}
 
 	svcMock := &ShortenerServiceMock{}
-	svcMock.On("Read", "test1").Return("https://example.org", nil)
-	svcMock.On("Read", "").Return("", errors.New("empty id"))
-	svcMock.On("Read", "missing").Return("", errors.New("missing id"))
+	svcMock.On("ReadURL", "test1").Return("https://example.org", nil)
+	svcMock.On("ReadURL", "").Return("", errors.New("empty id"))
+	svcMock.On("ReadURL", "missing").Return("", errors.New("missing id"))
 
 	tests := []struct {
 		name string
@@ -123,9 +123,9 @@ func TestWriteHandler(t *testing.T) {
 	}
 
 	svcMock := &ShortenerServiceMock{}
-	svcMock.On("Write", "https://example.org").Return("http://localhost/bar", nil)
-	svcMock.On("Write", "").Return("", errors.New("bad url"))
-	svcMock.On("Write", "bad").Return("", errors.New("bad url"))
+	svcMock.On("WriteURL", "https://example.org").Return("http://localhost/bar", nil)
+	svcMock.On("WriteURL", "").Return("", errors.New("bad url"))
+	svcMock.On("WriteURL", "bad").Return("", errors.New("bad url"))
 
 	tests := []struct {
 		name string

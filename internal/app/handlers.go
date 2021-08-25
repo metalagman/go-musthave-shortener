@@ -16,7 +16,7 @@ func IsURL(str string) bool {
 func ReadHandler(svc ShortenerService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := strings.TrimPrefix(r.URL.Path, "/")
-		u, err := svc.Read(id)
+		u, err := svc.ReadURL(id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -37,7 +37,7 @@ func WriteHandler(svc ShortenerService) http.HandlerFunc {
 			http.Error(w, "bad url", http.StatusBadRequest)
 			return
 		}
-		id, err := svc.Write(u)
+		id, err := svc.WriteURL(u)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return

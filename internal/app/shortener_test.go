@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestMemoryShortenerService_Read(t *testing.T) {
+func TestMemoryShortenerService_ReadURL(t *testing.T) {
 	type fields struct {
 		counter uint64
 		urls    map[uint64]string
@@ -70,19 +70,19 @@ func TestMemoryShortenerService_Read(t *testing.T) {
 				counter: tt.fields.counter,
 				urls:    tt.fields.urls,
 			}
-			got, err := svc.Read(tt.args.id)
+			got, err := svc.ReadURL(tt.args.id)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Read() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ReadURL() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("Read() got = %v, want %v", got, tt.want)
+				t.Errorf("ReadURL() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestMemoryShortenerService_Write(t *testing.T) {
+func TestMemoryShortenerService_WriteURL(t *testing.T) {
 	type fields struct {
 		counter uint64
 		urls    map[uint64]string
@@ -131,13 +131,13 @@ func TestMemoryShortenerService_Write(t *testing.T) {
 				counter: tt.fields.counter,
 				urls:    tt.fields.urls,
 			}
-			got, err := svc.Write(tt.args.url)
+			got, err := svc.WriteURL(tt.args.url)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Write() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("WriteURL() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("Write() got = %v, want %v", got, tt.want)
+				t.Errorf("WriteURL() got = %v, want %v", got, tt.want)
 			}
 		})
 	}

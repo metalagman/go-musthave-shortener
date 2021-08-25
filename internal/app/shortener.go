@@ -8,8 +8,8 @@ import (
 )
 
 type ShortenerService interface {
-	Write(url string) (string, error)
-	Read(id string) (string, error)
+	WriteURL(url string) (string, error)
+	ReadURL(id string) (string, error)
 }
 
 type MemoryShortenerService struct {
@@ -30,7 +30,7 @@ func NewMemoryShortenerService(addr string) *MemoryShortenerService {
 	}
 }
 
-func (svc *MemoryShortenerService) Write(url string) (string, error) {
+func (svc *MemoryShortenerService) WriteURL(url string) (string, error) {
 	if len(url) == 0 {
 		return "", errors.New("empty url")
 	}
@@ -45,7 +45,7 @@ func (svc *MemoryShortenerService) Write(url string) (string, error) {
 	return fmt.Sprintf("http://%s/%s", svc.addr, id), nil
 }
 
-func (svc *MemoryShortenerService) Read(id string) (string, error) {
+func (svc *MemoryShortenerService) ReadURL(id string) (string, error) {
 	intID, err := strconv.ParseUint(id, svc.base, 64)
 	if err != nil {
 		return "", err
