@@ -147,4 +147,6 @@ func TestNewMemoryShortenerService(t *testing.T) {
 	svc := NewMemoryShortenerService("localhost:8080")
 	assert.NotNil(t, svc)
 	assert.Equal(t, svc.addr, "localhost:8080")
+	expInterface := (*ShortenerService)(nil)
+	assert.Implementsf(t, expInterface, svc, "Interface %v must be implemented in %v", expInterface, svc)
 }
