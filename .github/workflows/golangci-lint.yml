@@ -1,4 +1,4 @@
-yname: golangci-lint
+name: golangci-lint
 on:
   push:
     tags:
