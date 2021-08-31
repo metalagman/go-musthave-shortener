@@ -32,7 +32,6 @@ func TestReadHandler(t *testing.T) {
 	}
 	type want struct {
 		code        int
-		response    string
 		redirectURL string
 	}
 

@@ -5,6 +5,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/russianlagman/go-musthave-shortener/internal/app"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/handlers/json"
 	"log"
 	"net/http"
 	"os"
@@ -38,6 +39,7 @@ func serve(ctx context.Context) (err error) {
 	r.Use(middleware.Logger)
 	r.Get("/{id:[0-9a-z]+}", app.ReadHandler(shortener))
 	r.Post("/", app.WriteHandler(shortener))
+	r.Post("/api/shorten", json.WriteHandler(shortener))
 	log.Printf("listening on %s\n", addr)
 
 	srv := &http.Server{
