@@ -15,7 +15,7 @@ func IsURL(str string) bool {
 }
 
 type WriteRequest struct {
-	Url string `json:"url"`
+	URL string `json:"url"`
 }
 
 type WriteResponse struct {
@@ -37,18 +37,18 @@ func WriteHandler(svc app.ShortenerService) http.HandlerFunc {
 			return
 		}
 
-		if !IsURL(reqObj.Url) {
+		if !IsURL(reqObj.URL) {
 			http.Error(w, "bad url", http.StatusBadRequest)
 			return
 		}
-		shortUrl, err := svc.WriteURL(reqObj.Url)
+		shortURL, err := svc.WriteURL(reqObj.URL)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
 
-		resBody, err := json.Marshal(&WriteResponse{Result: shortUrl})
+		resBody, err := json.Marshal(&WriteResponse{Result: shortURL})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return

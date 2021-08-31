@@ -116,9 +116,8 @@ func TestWriteHandler(t *testing.T) {
 		body string
 	}
 	type want struct {
-		code     int
-		response string
-		body     string
+		code int
+		body string
 	}
 
 	svcMock := &ShortenerServiceMock{}
