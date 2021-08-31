@@ -38,8 +38,8 @@ func serve(ctx context.Context) (err error) {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Get("/{id:[0-9a-z]+}", app.ReadHandler(shortener))
-	r.Post("/", app.WriteHandler(shortener))
 	r.Post("/api/shorten", json.WriteHandler(shortener))
+	r.Post("/", app.WriteHandler(shortener))
 	log.Printf("listening on %s\n", addr)
 
 	srv := &http.Server{
