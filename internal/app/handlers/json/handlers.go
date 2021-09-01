@@ -24,6 +24,11 @@ type WriteResponse struct {
 
 func WriteHandler(svc app.ShortenerService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Content-Type") != "application/json" {
+			http.Error(w, "invalid content type", http.StatusBadRequest)
+			return
+		}
+
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("error reading body: %v", err), http.StatusBadRequest)
