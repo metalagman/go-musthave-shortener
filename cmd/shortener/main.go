@@ -14,8 +14,6 @@ import (
 )
 
 func main() {
-	log.Printf("server started")
-
 	// Setting up signal capturing
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
