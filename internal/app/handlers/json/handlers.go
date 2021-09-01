@@ -30,13 +30,14 @@ func WriteHandler(svc app.ShortenerService) http.HandlerFunc {
 			return
 		}
 
-		body, err := ioutil.ReadAll(r.Body)
 		defer func(Body io.ReadCloser) {
 			err := Body.Close()
 			if err != nil {
 
 			}
 		}(r.Body)
+		body, err := ioutil.ReadAll(r.Body)
+
 		if err != nil {
 			http.Error(w, fmt.Sprintf("error reading body: %v", err), http.StatusBadRequest)
 			return
