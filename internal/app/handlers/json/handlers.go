@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/russianlagman/go-musthave-shortener/internal/app"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -30,6 +31,12 @@ func WriteHandler(svc app.ShortenerService) http.HandlerFunc {
 		}
 
 		body, err := ioutil.ReadAll(r.Body)
+		defer func(Body io.ReadCloser) {
+			err := Body.Close()
+			if err != nil {
+
+			}
+		}(r.Body)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("error reading body: %v", err), http.StatusBadRequest)
 			return
