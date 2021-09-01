@@ -46,7 +46,9 @@ func WriteHandler(svc app.ShortenerService) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+
 		w.WriteHeader(http.StatusCreated)
+		w.Header().Set("Content-Type", "application/json")
 
 		resBody, err := json.Marshal(&WriteResponse{Result: shortURL})
 		if err != nil {
