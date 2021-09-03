@@ -2,16 +2,38 @@ package main
 
 import (
 	"context"
+	"errors"
+	"github.com/caarlos0/env/v6"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/joho/godotenv"
 	"github.com/russianlagman/go-musthave-shortener/internal/app"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/handlers/json"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 )
+
+type Config struct {
+	ListenAddr string `env:"SERVER_ADDRESS,required"`
+	BaseUrl    string `env:"BASE_URL,required"`
+}
+
+// Load config from environment and from .env file (if exists)
+func (config *Config) Load() error {
+	err := godotenv.Load()
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+	err = env.Parse(config)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func main() {
 	// Setting up signal capturing
@@ -25,23 +47,28 @@ func main() {
 		cancel()
 	}()
 
-	if err := serve(ctx); err != nil {
+	config := Config{}
+	err := config.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := serve(ctx, config); err != nil {
 		log.Printf("failed to serve: %+v\n", err)
 	}
 }
 
-func serve(ctx context.Context) (err error) {
-	addr := "localhost:8080"
-	shortener := app.NewMemoryShortenerService(addr)
+func serve(ctx context.Context, config Config) (err error) {
+	shortener := app.NewMemoryShortenerService(config.ListenAddr, config.BaseUrl)
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Get("/{id:[0-9a-z]+}", app.ReadHandler(shortener))
 	r.Post("/api/shorten", json.WriteHandler(shortener))
 	r.Post("/", app.WriteHandler(shortener))
-	log.Printf("listening on %s\n", addr)
+	log.Printf("listening on %s\n", config.ListenAddr)
 
 	srv := &http.Server{
-		Addr:    addr,
+		Addr:    config.ListenAddr,
 		Handler: r,
 	}
 

@@ -64,11 +64,11 @@ func TestMemoryShortenerService_ReadURL(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			svc := &MemoryShortenerService{
-				Mutex:   sync.Mutex{},
-				addr:    "localhost:8080",
-				base:    10,
-				counter: tt.fields.counter,
-				urls:    tt.fields.urls,
+				Mutex:      sync.Mutex{},
+				listenAddr: "localhost:8080",
+				base:       10,
+				counter:    tt.fields.counter,
+				urls:       tt.fields.urls,
 			}
 			got, err := svc.ReadURL(tt.args.id)
 			if (err != nil) != tt.wantErr {
@@ -125,11 +125,12 @@ func TestMemoryShortenerService_WriteURL(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			svc := &MemoryShortenerService{
-				Mutex:   sync.Mutex{},
-				addr:    "localhost:8080",
-				base:    10,
-				counter: tt.fields.counter,
-				urls:    tt.fields.urls,
+				Mutex:      sync.Mutex{},
+				listenAddr: "localhost:8080",
+				baseUrl:    "http://localhost:8080",
+				base:       10,
+				counter:    tt.fields.counter,
+				urls:       tt.fields.urls,
 			}
 			got, err := svc.WriteURL(tt.args.url)
 			if (err != nil) != tt.wantErr {
@@ -144,9 +145,9 @@ func TestMemoryShortenerService_WriteURL(t *testing.T) {
 }
 
 func TestNewMemoryShortenerService(t *testing.T) {
-	svc := NewMemoryShortenerService("localhost:8080")
+	svc := NewMemoryShortenerService("localhost:8080", "http://localhost:8080")
 	assert.NotNil(t, svc)
-	assert.Equal(t, svc.addr, "localhost:8080")
+	assert.Equal(t, svc.listenAddr, "localhost:8080")
 	expInterface := (*ShortenerService)(nil)
 	assert.Implementsf(t, expInterface, svc, "Interface %v must be implemented in %v", expInterface, svc)
 }
