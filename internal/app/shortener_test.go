@@ -127,7 +127,7 @@ func TestMemoryShortenerService_WriteURL(t *testing.T) {
 			svc := &MemoryShortenerService{
 				Mutex:      sync.Mutex{},
 				listenAddr: "localhost:8080",
-				baseUrl:    "http://localhost:8080",
+				baseURL:    "http://localhost:8080",
 				base:       10,
 				counter:    tt.fields.counter,
 				urls:       tt.fields.urls,

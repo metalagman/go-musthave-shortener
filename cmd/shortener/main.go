@@ -18,8 +18,8 @@ import (
 )
 
 type Config struct {
-	ListenAddr string `env:"SERVER_ADDRESS,required"`
-	BaseUrl    string `env:"BASE_URL,required"`
+	ListenAddr string `env:"SERVER_ADDRESS,required" envDefault:"localhost:8080"`
+	BaseURL    string `env:"BASE_URL,required" envDefault:"http://localhost:8080"`
 }
 
 // Load config from environment and from .env file (if exists)
@@ -59,7 +59,7 @@ func main() {
 }
 
 func serve(ctx context.Context, config Config) (err error) {
-	shortener := app.NewMemoryShortenerService(config.ListenAddr, config.BaseUrl)
+	shortener := app.NewMemoryShortenerService(config.ListenAddr, config.BaseURL)
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Get("/{id:[0-9a-z]+}", app.ReadHandler(shortener))

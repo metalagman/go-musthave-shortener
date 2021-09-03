@@ -15,18 +15,18 @@ type ShortenerService interface {
 type MemoryShortenerService struct {
 	sync.Mutex
 	listenAddr string
-	baseUrl    string
+	baseURL    string
 	counter    uint64
 	base       int
 	urls       map[uint64]string
 }
 
-func NewMemoryShortenerService(listenAddr string, baseUrl string) *MemoryShortenerService {
+func NewMemoryShortenerService(listenAddr string, baseURL string) *MemoryShortenerService {
 	return &MemoryShortenerService{
 		Mutex:      sync.Mutex{},
 		counter:    30,
 		listenAddr: listenAddr,
-		baseUrl:    baseUrl,
+		baseURL:    baseURL,
 		base:       36,
 		urls:       make(map[uint64]string),
 	}
@@ -44,7 +44,7 @@ func (svc *MemoryShortenerService) WriteURL(url string) (string, error) {
 	svc.urls[svc.counter] = url
 	id := strconv.FormatUint(svc.counter, svc.base)
 
-	return fmt.Sprintf("%s/%s", svc.baseUrl, id), nil
+	return fmt.Sprintf("%s/%s", svc.baseURL, id), nil
 }
 
 func (svc *MemoryShortenerService) ReadURL(id string) (string, error) {
