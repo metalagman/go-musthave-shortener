@@ -42,9 +42,9 @@ func (config *Config) Load() error {
 		return fmt.Errorf("env parse error: %w", err)
 	}
 
-	flag.StringVar(&config.ListenAddr, "a", config.ListenAddr, "Server address to listen on")
-	flag.StringVar(&config.BaseURL, "b", config.BaseURL, "Base URL for shortened links")
-	flag.StringVar(&config.StorageFilePath, "f", config.StorageFilePath, "DB file path")
+	flag.StringVarP(&config.ListenAddr, "listen-addr", "a", config.ListenAddr, "Server address to listen on")
+	flag.StringVarP(&config.BaseURL, "base-url", "b", config.BaseURL, "Base URL for shortened links")
+	flag.StringVarP(&config.StorageFilePath, "storage-file-path", "f", config.StorageFilePath, "Storage file path")
 	flag.Parse()
 
 	return nil
