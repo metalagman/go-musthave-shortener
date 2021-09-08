@@ -76,7 +76,7 @@ func TestMemoryStore_ReadURL(t *testing.T) {
 				return
 			}
 			if got != tt.want {
-				t.Errorf("ReadURL() got = %v, want %v", got, tt.want)
+				t.Errorf("ReadURL() got = %v, wantErr %v", got, tt.want)
 			}
 		})
 	}
@@ -138,7 +138,7 @@ func TestMemoryStore_WriteURL(t *testing.T) {
 				return
 			}
 			if got != tt.want {
-				t.Errorf("WriteURL() got = %v, want %v", got, tt.want)
+				t.Errorf("WriteURL() got = %v, wantErr %v", got, tt.want)
 			}
 		})
 	}

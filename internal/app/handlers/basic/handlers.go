@@ -5,14 +5,8 @@ import (
 	"github.com/russianlagman/go-musthave-shortener/internal/app/services/shortener"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"strings"
 )
-
-func IsURL(str string) bool {
-	u, err := url.Parse(str)
-	return err == nil && u.Scheme != "" && u.Host != ""
-}
 
 func ReadHandler(store shortener.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -34,16 +28,12 @@ func WriteHandler(store shortener.Store) http.HandlerFunc {
 			return
 		}
 		u := string(body)
-		if !IsURL(u) {
-			http.Error(w, "bad url", http.StatusBadRequest)
-			return
-		}
-		id, err := store.WriteURL(u)
+		redirectURL, err := store.WriteURL(u)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
-		_, _ = w.Write([]byte(id))
+		_, _ = w.Write([]byte(redirectURL))
 	}
 }

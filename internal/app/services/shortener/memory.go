@@ -1,7 +1,6 @@
 package shortener
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"sync"
@@ -30,8 +29,8 @@ func NewMemoryStore(listenAddr string, baseURL string) *MemoryStore {
 }
 
 func (store *MemoryStore) WriteURL(url string) (string, error) {
-	if len(url) == 0 {
-		return "", errors.New("empty url")
+	if err := ValidateURL(url); err != nil {
+		return "", err
 	}
 
 	store.Lock()
@@ -47,7 +46,7 @@ func (store *MemoryStore) WriteURL(url string) (string, error) {
 func (store *MemoryStore) ReadURL(id string) (string, error) {
 	intID, err := strconv.ParseUint(id, store.base, 64)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("invalid id %q: %w", id, ErrBadInput)
 	}
 
 	store.Lock()
@@ -57,5 +56,5 @@ func (store *MemoryStore) ReadURL(id string) (string, error) {
 		return val, nil
 	}
 
-	return "", errors.New("not found")
+	return "", ErrNotFound
 }
