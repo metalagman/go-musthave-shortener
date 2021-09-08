@@ -9,7 +9,7 @@ import (
 func TestMemoryStore_ReadURL(t *testing.T) {
 	type fields struct {
 		counter uint64
-		urls    map[uint64]string
+		db      MemoryDB
 	}
 	type args struct {
 		id string
@@ -24,7 +24,7 @@ func TestMemoryStore_ReadURL(t *testing.T) {
 		{
 			"read existing",
 			fields{
-				urls: map[uint64]string{
+				db: MemoryDB{
 					1: "https://example.org",
 				},
 			},
@@ -37,7 +37,7 @@ func TestMemoryStore_ReadURL(t *testing.T) {
 		{
 			"read empty",
 			fields{
-				urls: map[uint64]string{
+				db: MemoryDB{
 					1: "https://example.org",
 				},
 			},
@@ -50,7 +50,7 @@ func TestMemoryStore_ReadURL(t *testing.T) {
 		{
 			"read missing",
 			fields{
-				urls: map[uint64]string{
+				db: MemoryDB{
 					1: "https://example.org",
 				},
 			},
@@ -68,7 +68,7 @@ func TestMemoryStore_ReadURL(t *testing.T) {
 				listenAddr: "localhost:8080",
 				base:       10,
 				counter:    tt.fields.counter,
-				urls:       tt.fields.urls,
+				db:         tt.fields.db,
 			}
 			got, err := store.ReadURL(tt.args.id)
 			if (err != nil) != tt.wantErr {
@@ -85,7 +85,7 @@ func TestMemoryStore_ReadURL(t *testing.T) {
 func TestMemoryStore_WriteURL(t *testing.T) {
 	type fields struct {
 		counter uint64
-		urls    map[uint64]string
+		urls    MemoryDB
 	}
 	type args struct {
 		url string
@@ -101,7 +101,7 @@ func TestMemoryStore_WriteURL(t *testing.T) {
 			"write url",
 			fields{
 				counter: 0,
-				urls:    map[uint64]string{},
+				urls:    MemoryDB{},
 			},
 			args{
 				url: "https://example.org",
@@ -113,7 +113,7 @@ func TestMemoryStore_WriteURL(t *testing.T) {
 			"write empty url",
 			fields{
 				counter: 0,
-				urls:    map[uint64]string{},
+				urls:    MemoryDB{},
 			},
 			args{
 				url: "",
@@ -130,7 +130,7 @@ func TestMemoryStore_WriteURL(t *testing.T) {
 				baseURL:    "http://localhost:8080",
 				base:       10,
 				counter:    tt.fields.counter,
-				urls:       tt.fields.urls,
+				db:         tt.fields.urls,
 			}
 			got, err := store.WriteURL(tt.args.url)
 			if (err != nil) != tt.wantErr {

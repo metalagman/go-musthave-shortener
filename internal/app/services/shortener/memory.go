@@ -14,8 +14,10 @@ type MemoryStore struct {
 	baseURL    string
 	counter    uint64
 	base       int
-	urls       map[uint64]string
+	db         MemoryDB
 }
+
+type MemoryDB map[uint64]string
 
 func NewMemoryStore(listenAddr string, baseURL string) *MemoryStore {
 	return &MemoryStore{
@@ -24,8 +26,20 @@ func NewMemoryStore(listenAddr string, baseURL string) *MemoryStore {
 		listenAddr: listenAddr,
 		baseURL:    baseURL,
 		base:       36,
-		urls:       make(map[uint64]string),
+		db:         make(MemoryDB),
 	}
+}
+
+func (store *MemoryStore) SetDB(db MemoryDB) {
+	store.Lock()
+	defer store.Unlock()
+	store.db = db
+}
+
+func (store *MemoryStore) GetDB() MemoryDB {
+	store.Lock()
+	defer store.Unlock()
+	return store.db
 }
 
 func (store *MemoryStore) WriteURL(url string) (string, error) {
@@ -37,7 +51,7 @@ func (store *MemoryStore) WriteURL(url string) (string, error) {
 	defer store.Unlock()
 
 	store.counter++
-	store.urls[store.counter] = url
+	store.db[store.counter] = url
 	id := strconv.FormatUint(store.counter, store.base)
 
 	return fmt.Sprintf("%s/%s", store.baseURL, id), nil
@@ -52,7 +66,7 @@ func (store *MemoryStore) ReadURL(id string) (string, error) {
 	store.Lock()
 	defer store.Unlock()
 
-	if val, ok := store.urls[intID]; ok {
+	if val, ok := store.db[intID]; ok {
 		return val, nil
 	}
 
