@@ -82,7 +82,7 @@ func serve(ctx context.Context, config Config) (err error) {
 			select {
 			case <-ctx.Done():
 				return
-			case _ = <-ticker.C:
+			case <-ticker.C:
 				log.Print("timer writing db")
 				_ = store.WriteDB()
 			}

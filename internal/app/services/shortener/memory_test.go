@@ -145,7 +145,7 @@ func TestMemoryStore_WriteURL(t *testing.T) {
 }
 
 func TestNewMemoryShortenerService(t *testing.T) {
-	store := NewMemoryStore("localhost:8080", "http://localhost:8080")
+	store := NewMemoryStore("localhost:8080", "http://localhost:8080", "urls.gob")
 	assert.NotNil(t, store)
 	assert.Equal(t, store.listenAddr, "localhost:8080")
 }
