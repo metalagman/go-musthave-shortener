@@ -64,7 +64,11 @@ func main() {
 
 func serve(ctx context.Context, config Config) (err error) {
 	store := shortener.NewMemoryStore(config.ListenAddr, config.BaseURL)
+
+	log.Printf("reading db from %q", config.StorageFilePath)
 	store.SetDB(readDb(config.StorageFilePath))
+	log.Printf("done reading db")
+
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Get("/{id:[0-9a-z]+}", basic.ReadHandler(store))
@@ -104,6 +108,10 @@ func serve(ctx context.Context, config Config) (err error) {
 		err = nil
 	}
 
+	log.Printf("writing db to %q", config.StorageFilePath)
+	writeDb(config.StorageFilePath, store.GetDB())
+	log.Printf("done writing db")
+
 	return
 }
 
@@ -130,4 +138,25 @@ func readDb(filePath string) shortener.MemoryDB {
 	}
 
 	return db
+}
+
+// readDb from file at filePath
+func writeDb(filePath string, db shortener.MemoryDB) {
+	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0777)
+	if err != nil {
+		log.Fatalf("error writing db at %q: %v", filePath, err)
+	}
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+
+		}
+	}(file)
+
+	encoder := gob.NewEncoder(file)
+
+	err = encoder.Encode(&db)
+	if err != nil && err != io.EOF {
+		log.Fatalf("encode error: %v", err)
+	}
 }
