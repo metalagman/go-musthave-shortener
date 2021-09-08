@@ -7,8 +7,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
-	"github.com/russianlagman/go-musthave-shortener/internal/app"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/handlers/basic"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/handlers/json"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/services/shortener"
 	"io/fs"
 	"log"
 	"net/http"
@@ -60,12 +61,12 @@ func main() {
 }
 
 func serve(ctx context.Context, config Config) (err error) {
-	shortener := app.NewMemoryShortenerService(config.ListenAddr, config.BaseURL)
+	store := shortener.NewMemoryStore(config.ListenAddr, config.BaseURL)
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
-	r.Get("/{id:[0-9a-z]+}", app.ReadHandler(shortener))
-	r.Post("/api/shorten", json.WriteHandler(shortener))
-	r.Post("/", app.WriteHandler(shortener))
+	r.Get("/{id:[0-9a-z]+}", basic.ReadHandler(store))
+	r.Post("/api/shorten", json.WriteHandler(store))
+	r.Post("/", basic.WriteHandler(store))
 	log.Printf("listening on %s\n", config.ListenAddr)
 
 	srv := &http.Server{

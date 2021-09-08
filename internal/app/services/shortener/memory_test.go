@@ -1,4 +1,4 @@
-package app
+package shortener
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestMemoryShortenerService_ReadURL(t *testing.T) {
+func TestMemoryStore_ReadURL(t *testing.T) {
 	type fields struct {
 		counter uint64
 		urls    map[uint64]string
@@ -63,14 +63,14 @@ func TestMemoryShortenerService_ReadURL(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			svc := &MemoryShortenerService{
+			store := &MemoryStore{
 				Mutex:      sync.Mutex{},
 				listenAddr: "localhost:8080",
 				base:       10,
 				counter:    tt.fields.counter,
 				urls:       tt.fields.urls,
 			}
-			got, err := svc.ReadURL(tt.args.id)
+			got, err := store.ReadURL(tt.args.id)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadURL() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -82,7 +82,7 @@ func TestMemoryShortenerService_ReadURL(t *testing.T) {
 	}
 }
 
-func TestMemoryShortenerService_WriteURL(t *testing.T) {
+func TestMemoryStore_WriteURL(t *testing.T) {
 	type fields struct {
 		counter uint64
 		urls    map[uint64]string
@@ -124,7 +124,7 @@ func TestMemoryShortenerService_WriteURL(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			svc := &MemoryShortenerService{
+			store := &MemoryStore{
 				Mutex:      sync.Mutex{},
 				listenAddr: "localhost:8080",
 				baseURL:    "http://localhost:8080",
@@ -132,7 +132,7 @@ func TestMemoryShortenerService_WriteURL(t *testing.T) {
 				counter:    tt.fields.counter,
 				urls:       tt.fields.urls,
 			}
-			got, err := svc.WriteURL(tt.args.url)
+			got, err := store.WriteURL(tt.args.url)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("WriteURL() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -145,9 +145,7 @@ func TestMemoryShortenerService_WriteURL(t *testing.T) {
 }
 
 func TestNewMemoryShortenerService(t *testing.T) {
-	svc := NewMemoryShortenerService("localhost:8080", "http://localhost:8080")
-	assert.NotNil(t, svc)
-	assert.Equal(t, svc.listenAddr, "localhost:8080")
-	expInterface := (*ShortenerService)(nil)
-	assert.Implementsf(t, expInterface, svc, "Interface %v must be implemented in %v", expInterface, svc)
+	store := NewMemoryStore("localhost:8080", "http://localhost:8080")
+	assert.NotNil(t, store)
+	assert.Equal(t, store.listenAddr, "localhost:8080")
 }

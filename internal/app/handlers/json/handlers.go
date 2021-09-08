@@ -3,7 +3,7 @@ package json
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/russianlagman/go-musthave-shortener/internal/app"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/services/shortener"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -22,7 +22,7 @@ type WriteResponse struct {
 	Result string `json:"result"`
 }
 
-func WriteHandler(svc app.ShortenerService) http.HandlerFunc {
+func WriteHandler(store shortener.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Content-Type") != "application/json" {
 			http.Error(w, "invalid content type", http.StatusBadRequest)
@@ -48,7 +48,7 @@ func WriteHandler(svc app.ShortenerService) http.HandlerFunc {
 			http.Error(w, "bad url", http.StatusBadRequest)
 			return
 		}
-		shortURL, err := svc.WriteURL(reqObj.URL)
+		shortURL, err := store.WriteURL(reqObj.URL)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
