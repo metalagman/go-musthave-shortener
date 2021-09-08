@@ -1,7 +1,10 @@
 package shortener
 
 import (
+	"encoding/gob"
 	"fmt"
+	"io"
+	"os"
 	"strconv"
 	"sync"
 )
@@ -12,6 +15,7 @@ type MemoryStore struct {
 	sync.Mutex
 	listenAddr string
 	baseURL    string
+	dbFilePath string
 	counter    uint64
 	base       int
 	db         MemoryDB
@@ -19,27 +23,16 @@ type MemoryStore struct {
 
 type MemoryDB map[uint64]string
 
-func NewMemoryStore(listenAddr string, baseURL string) *MemoryStore {
+func NewMemoryStore(listenAddr string, baseURL string, dbFilePath string) *MemoryStore {
 	return &MemoryStore{
 		Mutex:      sync.Mutex{},
 		counter:    30,
 		listenAddr: listenAddr,
 		baseURL:    baseURL,
+		dbFilePath: dbFilePath,
 		base:       36,
 		db:         make(MemoryDB),
 	}
-}
-
-func (store *MemoryStore) SetDB(db MemoryDB) {
-	store.Lock()
-	defer store.Unlock()
-	store.db = db
-}
-
-func (store *MemoryStore) GetDB() MemoryDB {
-	store.Lock()
-	defer store.Unlock()
-	return store.db
 }
 
 func (store *MemoryStore) WriteURL(url string) (string, error) {
@@ -71,4 +64,50 @@ func (store *MemoryStore) ReadURL(id string) (string, error) {
 	}
 
 	return "", ErrNotFound
+}
+
+// ReadDB from file
+func (store *MemoryStore) ReadDB() error {
+	file, err := os.OpenFile(store.dbFilePath, os.O_RDONLY|os.O_CREATE, 0777)
+	if err != nil {
+		return fmt.Errorf("error reading db at %q: %w", store.dbFilePath, err)
+	}
+	defer func(file *os.File) {
+		_ = file.Close()
+	}(file)
+
+	decoder := gob.NewDecoder(file)
+
+	store.Lock()
+	defer store.Unlock()
+
+	err = decoder.Decode(&store.db)
+	if err != nil && err != io.EOF {
+		return fmt.Errorf("decode error: %w", err)
+	}
+
+	return nil
+}
+
+// WriteDB db to file
+func (store *MemoryStore) WriteDB() error {
+	file, err := os.OpenFile(store.dbFilePath, os.O_WRONLY|os.O_CREATE, 0777)
+	if err != nil {
+		return fmt.Errorf("error writing db at %q: %w", store.dbFilePath, err)
+	}
+	defer func(file *os.File) {
+		_ = file.Close()
+	}(file)
+
+	encoder := gob.NewEncoder(file)
+
+	store.Lock()
+	defer store.Unlock()
+
+	err = encoder.Encode(&store.db)
+	if err != nil && err != io.EOF {
+		return fmt.Errorf("encode error: %w", err)
+	}
+
+	return nil
 }

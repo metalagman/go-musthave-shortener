@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/gob"
 	"errors"
 	"github.com/caarlos0/env/v6"
 	"github.com/go-chi/chi/v5"
@@ -11,7 +10,6 @@ import (
 	"github.com/russianlagman/go-musthave-shortener/internal/app/handlers/basic"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/handlers/json"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/services/shortener"
-	"io"
 	"io/fs"
 	"log"
 	"net/http"
@@ -21,9 +19,14 @@ import (
 )
 
 type Config struct {
-	ListenAddr      string `env:"SERVER_ADDRESS,required" envDefault:"localhost:8080"`
-	BaseURL         string `env:"BASE_URL,required" envDefault:"http://localhost:8080"`
-	StorageFilePath string `env:"FILE_STORAGE_PATH,required" envDefault:"urls.gob"`
+	ListenAddr           string `env:"SERVER_ADDRESS,required" envDefault:"localhost:8080"`
+	BaseURL              string `env:"BASE_URL,required" envDefault:"http://localhost:8080"`
+	StorageFilePath      string `env:"FILE_STORAGE_PATH,required" envDefault:"urls.gob"`
+	StorageFlushInterval time.Duration
+}
+
+func NewConfig() *Config {
+	return &Config{StorageFlushInterval: time.Second * 1}
 }
 
 // Load config from environment and from .env file (if exists)
@@ -51,23 +54,40 @@ func main() {
 		cancel()
 	}()
 
-	c := Config{}
+	c := NewConfig()
 	err := c.Load()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := serve(ctx, c); err != nil {
+	if err := serve(ctx, *c); err != nil {
 		log.Printf("failed to serve: %+v\n", err)
 	}
 }
 
 func serve(ctx context.Context, config Config) (err error) {
-	store := shortener.NewMemoryStore(config.ListenAddr, config.BaseURL)
+	store := shortener.NewMemoryStore(config.ListenAddr, config.BaseURL, config.StorageFilePath)
 
 	log.Printf("reading db from %q", config.StorageFilePath)
-	store.SetDB(readDb(config.StorageFilePath))
+	err = store.ReadDB()
+	if err != nil {
+		log.Fatal(err)
+	}
 	log.Printf("done reading db")
+
+	ticker := time.NewTicker(config.StorageFlushInterval)
+	defer ticker.Stop()
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case _ = <-ticker.C:
+				log.Print("timer writing db")
+				_ = store.WriteDB()
+			}
+		}
+	}()
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
@@ -109,54 +129,11 @@ func serve(ctx context.Context, config Config) (err error) {
 	}
 
 	log.Printf("writing db to %q", config.StorageFilePath)
-	writeDb(config.StorageFilePath, store.GetDB())
+	err = store.WriteDB()
+	if err != nil {
+		log.Printf("%v", err)
+	}
 	log.Printf("done writing db")
 
 	return
-}
-
-// readDb from file at filePath
-func readDb(filePath string) shortener.MemoryDB {
-	db := make(shortener.MemoryDB)
-
-	file, err := os.OpenFile(filePath, os.O_RDONLY|os.O_CREATE, 0777)
-	if err != nil {
-		log.Fatalf("error reading db at %q: %v", filePath, err)
-	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-
-		}
-	}(file)
-
-	decoder := gob.NewDecoder(file)
-
-	err = decoder.Decode(&db)
-	if err != nil && err != io.EOF {
-		log.Fatalf("decode error: %v", err)
-	}
-
-	return db
-}
-
-// readDb from file at filePath
-func writeDb(filePath string, db shortener.MemoryDB) {
-	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0777)
-	if err != nil {
-		log.Fatalf("error writing db at %q: %v", filePath, err)
-	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-
-		}
-	}(file)
-
-	encoder := gob.NewEncoder(file)
-
-	err = encoder.Encode(&db)
-	if err != nil && err != io.EOF {
-		log.Fatalf("encode error: %v", err)
-	}
 }
