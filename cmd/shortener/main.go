@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/caarlos0/env/v6"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -10,6 +11,7 @@ import (
 	"github.com/russianlagman/go-musthave-shortener/internal/app/handlers/basic"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/handlers/json"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/services/shortener"
+	flag "github.com/spf13/pflag"
 	"io/fs"
 	"log"
 	"net/http"
@@ -29,16 +31,22 @@ func NewConfig() *Config {
 	return &Config{StorageFlushInterval: time.Second * 1}
 }
 
-// Load config from environment and from .env file (if exists)
+// Load config from environment and from .env file (if exists) and from flags
 func (config *Config) Load() error {
 	err := godotenv.Load()
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
-		return err
+		return fmt.Errorf(".env load error: %w", err)
 	}
 	err = env.Parse(config)
 	if err != nil {
-		return err
+		return fmt.Errorf("env parse error: %w", err)
 	}
+
+	flag.StringVar(&config.ListenAddr, "a", config.ListenAddr, "Server address to listen on")
+	flag.StringVar(&config.BaseURL, "b", config.BaseURL, "Base URL for shortened links")
+	flag.StringVar(&config.StorageFilePath, "f", config.StorageFilePath, "DB file path")
+	flag.Parse()
+
 	return nil
 }
 
