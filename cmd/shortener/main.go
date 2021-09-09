@@ -63,8 +63,7 @@ func main() {
 	}()
 
 	c := NewConfig()
-	err := c.Load()
-	if err != nil {
+	if err := c.Load(); err != nil {
 		log.Fatal(err)
 	}
 
@@ -77,9 +76,8 @@ func serve(ctx context.Context, config Config) (err error) {
 	store := shortener.NewMemoryStore(config.ListenAddr, config.BaseURL, config.StorageFilePath)
 
 	log.Printf("reading db from %q", config.StorageFilePath)
-	err = store.ReadDB()
-	if err != nil {
-		log.Fatal(err)
+	if err = store.ReadDB(); err != nil {
+		return fmt.Errorf("error reading db: %w", err)
 	}
 	log.Printf("done reading db")
 
