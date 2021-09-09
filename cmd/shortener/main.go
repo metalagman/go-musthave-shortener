@@ -135,9 +135,8 @@ func serve(ctx context.Context, config Config) (err error) {
 	}
 
 	log.Printf("writing db to %q", config.StorageFilePath)
-	err = store.WriteDB()
-	if err != nil {
-		log.Printf("%v", err)
+	if err = store.WriteDB(); err != nil {
+		log.Printf("error writing db: %v", err)
 	}
 	log.Printf("done writing db")
 
