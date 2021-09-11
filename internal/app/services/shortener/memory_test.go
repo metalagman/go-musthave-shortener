@@ -2,7 +2,6 @@ package shortener
 
 import (
 	"github.com/stretchr/testify/assert"
-	"sync"
 	"testing"
 )
 
@@ -64,7 +63,6 @@ func TestMemoryStore_ReadURL(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			store := &MemoryStore{
-				Mutex:      sync.Mutex{},
 				listenAddr: "localhost:8080",
 				base:       10,
 				counter:    tt.fields.counter,
@@ -125,7 +123,6 @@ func TestMemoryStore_WriteURL(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			store := &MemoryStore{
-				Mutex:      sync.Mutex{},
 				listenAddr: "localhost:8080",
 				baseURL:    "http://localhost:8080",
 				base:       10,

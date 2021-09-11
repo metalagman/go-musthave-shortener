@@ -12,7 +12,7 @@ import (
 var _ Store = (*MemoryStore)(nil)
 
 type MemoryStore struct {
-	sync.Mutex
+	mu         sync.RWMutex
 	listenAddr string
 	baseURL    string
 	dbFilePath string
@@ -25,7 +25,6 @@ type MemoryDB map[uint64]string
 
 func NewMemoryStore(listenAddr string, baseURL string, dbFilePath string) *MemoryStore {
 	return &MemoryStore{
-		Mutex:      sync.Mutex{},
 		counter:    30,
 		listenAddr: listenAddr,
 		baseURL:    baseURL,
@@ -40,8 +39,8 @@ func (store *MemoryStore) WriteURL(url string) (string, error) {
 		return "", err
 	}
 
-	store.Lock()
-	defer store.Unlock()
+	store.mu.Lock()
+	defer store.mu.Unlock()
 
 	store.counter++
 	store.db[store.counter] = url
@@ -56,8 +55,8 @@ func (store *MemoryStore) ReadURL(id string) (string, error) {
 		return "", fmt.Errorf("invalid id %q: %w", id, ErrBadInput)
 	}
 
-	store.Lock()
-	defer store.Unlock()
+	store.mu.RLock()
+	defer store.mu.RUnlock()
 
 	if val, ok := store.db[intID]; ok {
 		return val, nil
@@ -78,8 +77,8 @@ func (store *MemoryStore) ReadDB() error {
 
 	decoder := gob.NewDecoder(file)
 
-	store.Lock()
-	defer store.Unlock()
+	store.mu.RLock()
+	defer store.mu.RUnlock()
 
 	err = decoder.Decode(&store.db)
 	if err != nil && err != io.EOF {
@@ -101,8 +100,8 @@ func (store *MemoryStore) WriteDB() error {
 
 	encoder := gob.NewEncoder(file)
 
-	store.Lock()
-	defer store.Unlock()
+	store.mu.Lock()
+	defer store.mu.Unlock()
 
 	err = encoder.Encode(&store.db)
 	if err != nil && err != io.EOF {
