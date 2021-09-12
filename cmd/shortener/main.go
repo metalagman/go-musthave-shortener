@@ -66,7 +66,8 @@ func serve(ctx context.Context, config Config) (err error) {
 	r.Get("/{id:[0-9a-z]+}", basic.ReadHandler(store))
 	r.Post("/api/shorten", json.WriteHandler(store))
 	r.Post("/", basic.WriteHandler(store))
-	log.Printf("listening on %s\n", config.ListenAddr)
+	log.Printf("listening on %s", config.ListenAddr)
+	log.Printf("base url %s", config.BaseURL)
 
 	srv := &http.Server{
 		Addr:    config.ListenAddr,

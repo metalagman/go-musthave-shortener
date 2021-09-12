@@ -8,12 +8,13 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/spf13/pflag"
 	"io/fs"
+	"net/url"
 	"time"
 )
 
 type Config struct {
 	ListenAddr           string `env:"SERVER_ADDRESS,required" envDefault:"localhost:8080" validate:"required,hostname_port"`
-	BaseURL              string `env:"BASE_URL,required" envDefault:"http://localhost:8080" validate:"required,url"`
+	BaseURL              string `env:"BASE_URL,required" envDefault:"http://localhost:8080" validate:"required,base_url"`
 	StorageFilePath      string `env:"FILE_STORAGE_PATH,required" envDefault:"urls.gob" validate:"required,file"`
 	StorageFlushInterval time.Duration
 }
@@ -43,5 +44,11 @@ func (config *Config) Load() error {
 
 func (config *Config) Validate() error {
 	validate := validator.New()
+
+	_ = validate.RegisterValidation("base_url", func(fl validator.FieldLevel) bool {
+		u, err := url.Parse(fl.Field().String())
+		return err == nil && u.Scheme != "" && u.Host != ""
+	})
+
 	return validate.Struct(config)
 }
