@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-playground/validator/v10"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/handlers/basic"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/handlers/json"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/services/shortener"
@@ -29,7 +30,18 @@ func main() {
 
 	c := NewConfig()
 	if err := c.Load(); err != nil {
-		log.Fatal(err)
+		log.Fatalf("config load error: %v", err)
+	}
+
+	if err := c.Validate(); err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			log.Fatalf(
+				"invalid value %s for config param %s, expected format: %s",
+				err.Value(),
+				err.StructField(),
+				err.ActualTag(),
+			)
+		}
 	}
 
 	if err := serve(ctx, *c); err != nil {

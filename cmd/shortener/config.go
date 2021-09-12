@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/caarlos0/env/v6"
+	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"github.com/spf13/pflag"
 	"io/fs"
@@ -11,9 +12,9 @@ import (
 )
 
 type Config struct {
-	ListenAddr           string `env:"SERVER_ADDRESS,required" envDefault:"localhost:8080"`
-	BaseURL              string `env:"BASE_URL,required" envDefault:"http://localhost:8080"`
-	StorageFilePath      string `env:"FILE_STORAGE_PATH,required" envDefault:"urls.gob"`
+	ListenAddr           string `env:"SERVER_ADDRESS,required" envDefault:"localhost:8080" validate:"required,hostname_port"`
+	BaseURL              string `env:"BASE_URL,required" envDefault:"http://localhost:8080" validate:"required,url"`
+	StorageFilePath      string `env:"FILE_STORAGE_PATH,required" envDefault:"urls.gob" validate:"required,file"`
 	StorageFlushInterval time.Duration
 }
 
@@ -38,4 +39,9 @@ func (config *Config) Load() error {
 	pflag.Parse()
 
 	return nil
+}
+
+func (config *Config) Validate() error {
+	validate := validator.New()
+	return validate.Struct(config)
 }
