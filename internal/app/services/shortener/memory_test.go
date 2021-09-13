@@ -1,15 +1,15 @@
-package app
+package shortener
 
 import (
 	"github.com/stretchr/testify/assert"
-	"sync"
 	"testing"
+	"time"
 )
 
-func TestMemoryShortenerService_ReadURL(t *testing.T) {
+func TestMemoryStore_ReadURL(t *testing.T) {
 	type fields struct {
 		counter uint64
-		urls    map[uint64]string
+		db      MemoryDB
 	}
 	type args struct {
 		id string
@@ -24,7 +24,7 @@ func TestMemoryShortenerService_ReadURL(t *testing.T) {
 		{
 			"read existing",
 			fields{
-				urls: map[uint64]string{
+				db: MemoryDB{
 					1: "https://example.org",
 				},
 			},
@@ -37,7 +37,7 @@ func TestMemoryShortenerService_ReadURL(t *testing.T) {
 		{
 			"read empty",
 			fields{
-				urls: map[uint64]string{
+				db: MemoryDB{
 					1: "https://example.org",
 				},
 			},
@@ -50,7 +50,7 @@ func TestMemoryShortenerService_ReadURL(t *testing.T) {
 		{
 			"read missing",
 			fields{
-				urls: map[uint64]string{
+				db: MemoryDB{
 					1: "https://example.org",
 				},
 			},
@@ -63,29 +63,28 @@ func TestMemoryShortenerService_ReadURL(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			svc := &MemoryShortenerService{
-				Mutex:   sync.Mutex{},
-				addr:    "localhost:8080",
-				base:    10,
-				counter: tt.fields.counter,
-				urls:    tt.fields.urls,
+			store := &MemoryStore{
+				listenAddr: "localhost:8080",
+				base:       10,
+				counter:    tt.fields.counter,
+				db:         tt.fields.db,
 			}
-			got, err := svc.ReadURL(tt.args.id)
+			got, err := store.ReadURL(tt.args.id)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadURL() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("ReadURL() got = %v, want %v", got, tt.want)
+				t.Errorf("ReadURL() got = %v, wantErr %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestMemoryShortenerService_WriteURL(t *testing.T) {
+func TestMemoryStore_WriteURL(t *testing.T) {
 	type fields struct {
 		counter uint64
-		urls    map[uint64]string
+		urls    MemoryDB
 	}
 	type args struct {
 		url string
@@ -101,7 +100,7 @@ func TestMemoryShortenerService_WriteURL(t *testing.T) {
 			"write url",
 			fields{
 				counter: 0,
-				urls:    map[uint64]string{},
+				urls:    MemoryDB{},
 			},
 			args{
 				url: "https://example.org",
@@ -113,7 +112,7 @@ func TestMemoryShortenerService_WriteURL(t *testing.T) {
 			"write empty url",
 			fields{
 				counter: 0,
-				urls:    map[uint64]string{},
+				urls:    MemoryDB{},
 			},
 			args{
 				url: "",
@@ -124,29 +123,32 @@ func TestMemoryShortenerService_WriteURL(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			svc := &MemoryShortenerService{
-				Mutex:   sync.Mutex{},
-				addr:    "localhost:8080",
-				base:    10,
-				counter: tt.fields.counter,
-				urls:    tt.fields.urls,
+			store := &MemoryStore{
+				listenAddr: "localhost:8080",
+				baseURL:    "http://localhost:8080",
+				base:       10,
+				counter:    tt.fields.counter,
+				db:         tt.fields.urls,
 			}
-			got, err := svc.WriteURL(tt.args.url)
+			got, err := store.WriteURL(tt.args.url)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("WriteURL() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("WriteURL() got = %v, want %v", got, tt.want)
+				t.Errorf("WriteURL() got = %v, wantErr %v", got, tt.want)
 			}
 		})
 	}
 }
 
 func TestNewMemoryShortenerService(t *testing.T) {
-	svc := NewMemoryShortenerService("localhost:8080")
-	assert.NotNil(t, svc)
-	assert.Equal(t, svc.addr, "localhost:8080")
-	expInterface := (*ShortenerService)(nil)
-	assert.Implementsf(t, expInterface, svc, "Interface %v must be implemented in %v", expInterface, svc)
+	store := NewMemoryStore(
+		"localhost:8080",
+		"http://localhost:8080",
+		"urls.gob",
+		time.Second,
+	)
+	assert.NotNil(t, store)
+	assert.Equal(t, store.listenAddr, "localhost:8080")
 }
