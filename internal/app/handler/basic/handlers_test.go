@@ -2,7 +2,7 @@ package basic
 
 import (
 	"errors"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/services/shortener"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/service/shortener"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"

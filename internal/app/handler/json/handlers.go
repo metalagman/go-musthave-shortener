@@ -3,7 +3,7 @@ package json
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/services/shortener"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/service/shortener"
 	"io/ioutil"
 	"net/http"
 	"net/url"
