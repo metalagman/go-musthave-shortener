@@ -1,4 +1,4 @@
-package shortener
+package store
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -142,13 +142,13 @@ func TestMemoryStore_WriteURL(t *testing.T) {
 	}
 }
 
-func TestNewMemoryShortenerService(t *testing.T) {
-	store := NewMemoryStore(
+func TestNewMemoryStore(t *testing.T) {
+	s := NewMemoryStore(
 		"localhost:8080",
 		"http://localhost:8080",
 		"urls.gob",
 		time.Second,
 	)
-	assert.NotNil(t, store)
-	assert.Equal(t, store.listenAddr, "localhost:8080")
+	assert.NotNil(t, s)
+	assert.Equal(t, s.listenAddr, "localhost:8080")
 }

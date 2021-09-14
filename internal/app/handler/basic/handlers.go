@@ -2,13 +2,13 @@ package basic
 
 import (
 	"fmt"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/service/shortener"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
 	"io/ioutil"
 	"net/http"
 	"strings"
 )
 
-func ReadHandler(store shortener.Store) http.HandlerFunc {
+func ReadHandler(store store.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := strings.TrimPrefix(r.URL.Path, "/")
 		u, err := store.ReadURL(id)
@@ -20,7 +20,7 @@ func ReadHandler(store shortener.Store) http.HandlerFunc {
 	}
 }
 
-func WriteHandler(store shortener.Store) http.HandlerFunc {
+func WriteHandler(store store.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {

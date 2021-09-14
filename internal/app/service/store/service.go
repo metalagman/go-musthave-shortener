@@ -1,4 +1,4 @@
-package shortener
+package store
 
 import (
 	"errors"
@@ -10,7 +10,7 @@ var ErrBadInput = errors.New("bad input")
 var ErrEmptyInput = fmt.Errorf("%w: empty url", ErrBadInput)
 var ErrNotFound = errors.New("not found")
 
-// Store of the db served by shortener
+// Store of the db served by store
 type Store interface {
 	// WriteURL to storage, returns short URL
 	WriteURL(url string) (string, error)

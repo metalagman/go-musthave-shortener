@@ -2,7 +2,7 @@ package json
 
 import (
 	"errors"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/service/shortener"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
@@ -13,7 +13,7 @@ import (
 
 func TestWriteHandler(t *testing.T) {
 	type args struct {
-		store       shortener.Store
+		store       store.Store
 		contentType string
 		body        string
 	}
@@ -22,10 +22,10 @@ func TestWriteHandler(t *testing.T) {
 		body string
 	}
 
-	store := &shortener.StoreMock{}
-	store.On("WriteURL", "https://example.org").Return("http://localhost/bar", nil)
-	store.On("WriteURL", "").Return("", errors.New("bad url"))
-	store.On("WriteURL", "bad").Return("", errors.New("bad url"))
+	s := &store.Mock{}
+	s.On("WriteURL", "https://example.org").Return("http://localhost/bar", nil)
+	s.On("WriteURL", "").Return("", errors.New("bad url"))
+	s.On("WriteURL", "bad").Return("", errors.New("bad url"))
 
 	tests := []struct {
 		name string
@@ -35,7 +35,7 @@ func TestWriteHandler(t *testing.T) {
 		{
 			"write ok",
 			args{
-				store:       store,
+				store:       s,
 				contentType: "application/json",
 				body:        "{\"url\":\"https://example.org\"}",
 			},
@@ -47,7 +47,7 @@ func TestWriteHandler(t *testing.T) {
 		{
 			"write empty",
 			args{
-				store:       store,
+				store:       s,
 				contentType: "application/json",
 				body:        "",
 			},
@@ -59,7 +59,7 @@ func TestWriteHandler(t *testing.T) {
 		{
 			"write bad",
 			args{
-				store:       store,
+				store:       s,
 				contentType: "application/json",
 				body:        "{\"url\":\"bad\"}",
 			},
@@ -76,7 +76,7 @@ func TestWriteHandler(t *testing.T) {
 			// создаём новый Recorder
 			w := httptest.NewRecorder()
 			// определяем хендлер
-			h := WriteHandler(store)
+			h := WriteHandler(s)
 			// запускаем сервер
 			h.ServeHTTP(w, request)
 			res := w.Result()

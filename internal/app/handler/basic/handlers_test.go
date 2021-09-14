@@ -2,7 +2,7 @@ package basic
 
 import (
 	"errors"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/service/shortener"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
@@ -13,7 +13,7 @@ import (
 
 func TestReadHandler(t *testing.T) {
 	type args struct {
-		store shortener.Store
+		store store.Store
 		path  string
 	}
 	type want struct {
@@ -21,10 +21,10 @@ func TestReadHandler(t *testing.T) {
 		redirectURL string
 	}
 
-	store := &shortener.StoreMock{}
-	store.On("ReadURL", "test1").Return("https://example.org", nil)
-	store.On("ReadURL", "").Return("", errors.New("empty id"))
-	store.On("ReadURL", "missing").Return("", errors.New("missing id"))
+	s := &store.Mock{}
+	s.On("ReadURL", "test1").Return("https://example.org", nil)
+	s.On("ReadURL", "").Return("", errors.New("empty id"))
+	s.On("ReadURL", "missing").Return("", errors.New("missing id"))
 
 	tests := []struct {
 		name string
@@ -34,7 +34,7 @@ func TestReadHandler(t *testing.T) {
 		{
 			"read ok",
 			args{
-				store: store,
+				store: s,
 				path:  "/test1",
 			},
 			want{
@@ -45,7 +45,7 @@ func TestReadHandler(t *testing.T) {
 		{
 			"read empty",
 			args{
-				store: store,
+				store: s,
 				path:  "/",
 			},
 			want{
@@ -55,7 +55,7 @@ func TestReadHandler(t *testing.T) {
 		{
 			"read missing",
 			args{
-				store: store,
+				store: s,
 				path:  "/",
 			},
 			want{
@@ -69,7 +69,7 @@ func TestReadHandler(t *testing.T) {
 			// создаём новый Recorder
 			w := httptest.NewRecorder()
 			// определяем хендлер
-			h := ReadHandler(store)
+			h := ReadHandler(s)
 			// запускаем сервер
 			h.ServeHTTP(w, request)
 			res := w.Result()
@@ -98,7 +98,7 @@ func TestReadHandler(t *testing.T) {
 
 func TestWriteHandler(t *testing.T) {
 	type args struct {
-		store shortener.Store
+		store store.Store
 		body  string
 	}
 	type want struct {
@@ -106,10 +106,10 @@ func TestWriteHandler(t *testing.T) {
 		body string
 	}
 
-	store := &shortener.StoreMock{}
-	store.On("WriteURL", "https://example.org").Return("http://localhost/bar", nil)
-	store.On("WriteURL", "").Return("", errors.New("bad url"))
-	store.On("WriteURL", "bad").Return("", errors.New("bad url"))
+	s := &store.Mock{}
+	s.On("WriteURL", "https://example.org").Return("http://localhost/bar", nil)
+	s.On("WriteURL", "").Return("", errors.New("bad url"))
+	s.On("WriteURL", "bad").Return("", errors.New("bad url"))
 
 	tests := []struct {
 		name string
@@ -119,7 +119,7 @@ func TestWriteHandler(t *testing.T) {
 		{
 			"write ok",
 			args{
-				store: store,
+				store: s,
 				body:  "https://example.org",
 			},
 			want{
@@ -130,7 +130,7 @@ func TestWriteHandler(t *testing.T) {
 		{
 			"write empty",
 			args{
-				store: store,
+				store: s,
 				body:  "",
 			},
 			want{
@@ -141,7 +141,7 @@ func TestWriteHandler(t *testing.T) {
 		{
 			"write bad",
 			args{
-				store: store,
+				store: s,
 				body:  "bad",
 			},
 			want{
@@ -156,7 +156,7 @@ func TestWriteHandler(t *testing.T) {
 			// создаём новый Recorder
 			w := httptest.NewRecorder()
 			// определяем хендлер
-			h := WriteHandler(store)
+			h := WriteHandler(s)
 			// запускаем сервер
 			h.ServeHTTP(w, request)
 			res := w.Result()

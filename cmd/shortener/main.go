@@ -8,7 +8,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/handler/basic"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/handler/json"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/service/shortener"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/middleware/gzip"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
 	"log"
 	"net/http"
 	"os"
@@ -50,24 +51,24 @@ func main() {
 }
 
 func serve(ctx context.Context, config Config) (err error) {
-	store := shortener.NewMemoryStore(
+	s := store.NewMemoryStore(
 		config.ListenAddr,
 		config.BaseURL,
 		config.StorageFilePath,
 		config.StorageFlushInterval,
 	)
 
-	if err := store.Serve(); err != nil {
+	if err := s.Serve(); err != nil {
 		return fmt.Errorf("store serve failed: %w", err)
 	}
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
-	r.Use(gzipResponseWriter)
-	r.Use(gzipRequestReader)
-	r.Get("/{id:[0-9a-z]+}", basic.ReadHandler(store))
-	r.Post("/api/shorten", json.WriteHandler(store))
-	r.Post("/", basic.WriteHandler(store))
+	r.Use(gzip.ResponseWriter)
+	r.Use(gzip.RequestReader)
+	r.Get("/{id:[0-9a-z]+}", basic.ReadHandler(s))
+	r.Post("/api/shorten", json.WriteHandler(s))
+	r.Post("/", basic.WriteHandler(s))
 	log.Printf("listening on %s", config.ListenAddr)
 	log.Printf("base url %s", config.BaseURL)
 
@@ -88,7 +89,7 @@ func serve(ctx context.Context, config Config) (err error) {
 
 	log.Printf("server stopped")
 
-	if err = store.Shutdown(); err != nil {
+	if err = s.Shutdown(); err != nil {
 		return fmt.Errorf("store shutdown failed: %w", err)
 	}
 
