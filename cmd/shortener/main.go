@@ -62,6 +62,7 @@ func serve(ctx context.Context, config Config) (err error) {
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
+	r.Use(middleware.Compress(5))
 	r.Get("/{id:[0-9a-z]+}", basic.ReadHandler(store))
 	r.Post("/api/shorten", json.WriteHandler(store))
 	r.Post("/", basic.WriteHandler(store))
