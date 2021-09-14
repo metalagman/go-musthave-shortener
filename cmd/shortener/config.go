@@ -20,7 +20,7 @@ type Config struct {
 }
 
 func NewConfig() *Config {
-	return &Config{StorageFlushInterval: time.Second * 1}
+	return &Config{StorageFlushInterval: time.Second * 5}
 }
 
 // Load config from environment and from .env file (if exists) and from flags
