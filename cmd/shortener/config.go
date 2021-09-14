@@ -13,9 +13,10 @@ import (
 )
 
 type Config struct {
-	ListenAddr           string `env:"SERVER_ADDRESS,required" envDefault:"localhost:8080" validate:"required,hostname_port"`
-	BaseURL              string `env:"BASE_URL,required" envDefault:"http://localhost:8080" validate:"required,base_url"`
-	StorageFilePath      string `env:"FILE_STORAGE_PATH,required" envDefault:"urls.gob" validate:"required,file"`
+	ListenAddr      string `env:"SERVER_ADDRESS,required" envDefault:"localhost:8080" validate:"required,hostname_port"`
+	BaseURL         string `env:"BASE_URL,required" envDefault:"http://localhost:8080" validate:"required,base_url"`
+	StorageFilePath string `env:"FILE_STORAGE_PATH,required" envDefault:"urls.gob" validate:"required"`
+	//StorageFilePath      string `env:"FILE_STORAGE_PATH,required" envDefault:"urls.gob" validate:"required,file"`
 	StorageFlushInterval time.Duration
 }
 
