@@ -8,6 +8,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/handler/basic"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/handler/json"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/middleware/auth"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/middleware/gzip"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
 	"log"
@@ -64,6 +65,8 @@ func serve(ctx context.Context, config Config) (err error) {
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	r.Use(auth.SecureCookie("test secret"))
 	r.Use(gzip.ResponseWriter)
 	r.Use(gzip.RequestReader)
 	r.Get("/{id:[0-9a-z]+}", basic.ReadHandler(s))
