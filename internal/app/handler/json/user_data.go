@@ -17,6 +17,7 @@ func UserDataHandler(s store.UserStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		rows := s.ReadUserURLs(r.Context().Value(middleware.ContextKeyUID{}).(string))
 		respObj := make(UserDataResponse, len(rows))
+
 		for _, row := range rows {
 			respObj = append(respObj, UserDataItem{
 				ShortURL:    row.ShortURL,
@@ -24,6 +25,11 @@ func UserDataHandler(s store.UserStore) http.HandlerFunc {
 			})
 		}
 
-		writeResponse(w, respObj, http.StatusOK)
+		statusCode := http.StatusOK
+		if len(respObj) == 0 {
+			statusCode = http.StatusNoContent
+		}
+
+		writeResponse(w, respObj, statusCode)
 	}
 }
