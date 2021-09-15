@@ -1,7 +1,6 @@
 package json
 
 import (
-	"errors"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
@@ -24,8 +23,8 @@ func TestWriteHandler(t *testing.T) {
 
 	s := &store.Mock{}
 	s.On("WriteURL", "https://example.org").Return("http://localhost/bar", nil)
-	s.On("WriteURL", "").Return("", errors.New("bad url"))
-	s.On("WriteURL", "bad").Return("", errors.New("bad url"))
+	s.On("WriteURL", "").Return("", store.ErrBadInput)
+	s.On("WriteURL", "bad").Return("", store.ErrBadInput)
 
 	tests := []struct {
 		name string
@@ -53,7 +52,7 @@ func TestWriteHandler(t *testing.T) {
 			},
 			want{
 				code: http.StatusBadRequest,
-				body: "json read error: unexpected end of JSON input\n",
+				body: "{\"error\":\"json decode: unexpected end of JSON input\"}",
 			},
 		},
 		{
@@ -65,7 +64,7 @@ func TestWriteHandler(t *testing.T) {
 			},
 			want{
 				code: http.StatusBadRequest,
-				body: "bad url\n",
+				body: "{\"error\":\"bad input\"}",
 			},
 		},
 	}
@@ -85,9 +84,10 @@ func TestWriteHandler(t *testing.T) {
 				t,
 				tt.want.code,
 				res.StatusCode,
-				"Expected status code %d, got %d",
+				"Expected status code %d, got %d\nBody was: %s",
 				tt.want.code,
 				w.Code,
+				resBody,
 			)
 			assert.Equal(
 				t,

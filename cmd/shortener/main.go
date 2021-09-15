@@ -3,13 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-playground/validator/v10"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/handler/basic"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/handler/json"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/middleware/auth"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/middleware/gzip"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
 	"log"
 	"net/http"
@@ -46,12 +40,12 @@ func main() {
 		}
 	}
 
-	if err := serve(ctx, *c); err != nil {
+	if err := serve(ctx, c); err != nil {
 		log.Printf("failed to serve: %+v\n", err)
 	}
 }
 
-func serve(ctx context.Context, config Config) (err error) {
+func serve(ctx context.Context, config *Config) (err error) {
 	s := store.NewMemoryStore(
 		config.ListenAddr,
 		config.BaseURL,
@@ -63,33 +57,17 @@ func serve(ctx context.Context, config Config) (err error) {
 		return fmt.Errorf("store serve failed: %w", err)
 	}
 
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	r.Use(auth.SecureCookie("test secret"))
-	r.Use(gzip.ResponseWriter)
-	r.Use(gzip.RequestReader)
-	r.Get("/{id:[0-9a-z]+}", basic.ReadHandler(s))
-	r.Post("/api/shorten", json.WriteHandler(s))
-	r.Post("/", basic.WriteHandler(s))
-	log.Printf("listening on %s", config.ListenAddr)
-	log.Printf("base url %s", config.BaseURL)
-
-	srv := &http.Server{
-		Addr:    config.ListenAddr,
-		Handler: r,
-	}
-
+	srv := NewServer(config, s)
 	go func() {
+		log.Printf("listening on %s", config.ListenAddr)
+		log.Printf("base url %s", config.BaseURL)
 		if err = srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %+v\n", err)
 		}
 	}()
 
 	log.Printf("server started")
-
 	<-ctx.Done()
-
 	log.Printf("server stopped")
 
 	if err = s.Shutdown(); err != nil {

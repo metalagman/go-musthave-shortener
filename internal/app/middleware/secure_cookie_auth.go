@@ -1,4 +1,4 @@
-package auth
+package middleware
 
 import (
 	"context"
@@ -14,7 +14,7 @@ const cookieNameUID string = "uid"
 
 type ContextKeyUID struct{}
 
-func SecureCookie(secretKey string) func(next http.Handler) http.Handler {
+func SecureCookieAuth(secretKey string) func(next http.Handler) http.Handler {
 	sc := securecookie.New(secretKey)
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

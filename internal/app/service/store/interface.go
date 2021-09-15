@@ -5,9 +5,11 @@ import (
 	"fmt"
 )
 
-var ErrBadInput = errors.New("bad input")
-var ErrEmptyInput = fmt.Errorf("%w: empty url", ErrBadInput)
-var ErrNotFound = errors.New("not found")
+var (
+	ErrBadInput   = errors.New("bad input")
+	ErrEmptyInput = fmt.Errorf("%w: empty url", ErrBadInput)
+	ErrNotFound   = errors.New("not found")
+)
 
 // Store of the db served by store
 type Store interface {
