@@ -1,6 +1,7 @@
 package json
 
 import (
+	"github.com/russianlagman/go-musthave-shortener/internal/app/middleware"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
 	"net/http"
 )
@@ -12,9 +13,17 @@ type UserDataItem struct {
 	OriginalURL string `json:"original_url"`
 }
 
-func UserDataHandler(s store.Store) http.HandlerFunc {
+func UserDataHandler(s store.UserStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		respObj := UserDataResponse{}
+		rows := s.ReadUserURLs(r.Context().Value(middleware.ContextKeyUID{}).(string))
+		respObj := make(UserDataResponse, len(rows))
+		for _, row := range rows {
+			respObj = append(respObj, UserDataItem{
+				ShortURL:    row.ShortURL,
+				OriginalURL: row.OriginalURL,
+			})
+		}
+
 		writeResponse(w, respObj, http.StatusOK)
 	}
 }

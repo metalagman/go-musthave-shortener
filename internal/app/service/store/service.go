@@ -13,6 +13,7 @@ import (
 )
 
 var _ Store = (*MemoryStore)(nil)
+var _ UserStore = (*MemoryStore)(nil)
 
 var ErrAlreadyServing = errors.New("already serving")
 var ErrNotServing = errors.New("not serving")
@@ -23,14 +24,20 @@ type MemoryStore struct {
 	baseURL         string
 	counter         uint64
 	base            int
-	db              MemoryDB
+	db              db
 	dbFilePath      string
 	dbFlushInterval time.Duration
 	dbFlushSignal   chan struct{}
 	dbFlushTicker   *time.Ticker
 }
 
-type MemoryDB map[uint64]string
+type db map[uint64]dbRow
+type dbRow struct {
+	ID          string
+	OriginalURL string
+	ShortURL    string
+	UID         string
+}
 
 func NewMemoryStore(listenAddr string, baseURL string, dbFilePath string, dbFlushInterval time.Duration) *MemoryStore {
 	return &MemoryStore{
@@ -39,7 +46,7 @@ func NewMemoryStore(listenAddr string, baseURL string, dbFilePath string, dbFlus
 		baseURL:         baseURL,
 		dbFilePath:      dbFilePath,
 		base:            36,
-		db:              make(MemoryDB),
+		db:              make(db),
 		dbFlushInterval: dbFlushInterval,
 	}
 }
@@ -108,18 +115,7 @@ func (store *MemoryStore) Shutdown() error {
 }
 
 func (store *MemoryStore) WriteURL(url string) (string, error) {
-	if err := validateURL(url); err != nil {
-		return "", err
-	}
-
-	store.mu.Lock()
-	defer store.mu.Unlock()
-
-	store.counter++
-	store.db[store.counter] = url
-	id := strconv.FormatUint(store.counter, store.base)
-
-	return fmt.Sprintf("%s/%s", store.baseURL, id), nil
+	return store.WriteUserURL(url, "")
 }
 
 func (store *MemoryStore) ReadURL(id string) (string, error) {
@@ -132,10 +128,46 @@ func (store *MemoryStore) ReadURL(id string) (string, error) {
 	defer store.mu.RUnlock()
 
 	if val, ok := store.db[intID]; ok {
-		return val, nil
+		return val.OriginalURL, nil
 	}
 
 	return "", ErrNotFound
+}
+
+func (store *MemoryStore) WriteUserURL(url string, uid string) (string, error) {
+	if err := validateURL(url); err != nil {
+		return "", err
+	}
+
+	store.mu.Lock()
+	defer store.mu.Unlock()
+
+	store.counter++
+	id := strconv.FormatUint(store.counter, store.base)
+	shortURL := fmt.Sprintf("%s/%s", store.baseURL, id)
+
+	store.db[store.counter] = dbRow{
+		ID:          id,
+		OriginalURL: url,
+		ShortURL:    shortURL,
+		UID:         uid,
+	}
+
+	return shortURL, nil
+}
+
+func (store *MemoryStore) ReadUserURLs(uid string) []StoredURL {
+	var result []StoredURL
+	for _, row := range store.db {
+		if row.UID != uid {
+			continue
+		}
+		result = append(result, StoredURL{
+			OriginalURL: row.OriginalURL,
+			ShortURL:    row.ShortURL,
+		})
+	}
+	return result
 }
 
 // readDB from file

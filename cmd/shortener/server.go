@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-func NewServer(config *Config, store store.Store) *http.Server {
+func NewServer(config *Config, store *store.MemoryStore) *http.Server {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
