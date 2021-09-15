@@ -1,6 +1,8 @@
 package json
 
 import (
+	"context"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/handler"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
@@ -71,6 +73,7 @@ func TestWriteHandler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			request := httptest.NewRequest("POST", "/api/shorten", strings.NewReader(tt.args.body))
+			request = request.WithContext(context.WithValue(request.Context(), handler.ContextKeyUID{}, "test"))
 			request.Header.Set("Content-Type", tt.args.contentType)
 			// создаём новый Recorder
 			w := httptest.NewRecorder()
