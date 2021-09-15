@@ -10,9 +10,10 @@ func ContentTypeJSON(next http.Handler) http.Handler {
 			http.Error(w, "invalid content type", http.StatusBadRequest)
 			return
 		}
+
 		next.ServeHTTP(w, r)
-		//if w.Header().Get("ContentType") != "" {
-		r.Header.Set("Content-Type", "application/json")
-		//}
+		if w.Header().Get("ContentType") != "" {
+			w.Header().Set("Content-Type", "application/json")
+		}
 	})
 }
