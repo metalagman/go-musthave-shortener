@@ -15,6 +15,8 @@ type UserDataItem struct {
 
 func UserDataHandler(s store.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
 		rows := s.ReadUserURLs(handler.ReadContextString(r.Context(), handler.ContextKeyUID{}))
 		respObj := make(UserDataResponse, len(rows))
 
