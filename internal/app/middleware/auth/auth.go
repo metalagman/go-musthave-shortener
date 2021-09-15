@@ -24,10 +24,10 @@ func SecureCookie(secretKey string) func(next http.Handler) http.Handler {
 			// reading or regenerating uid
 			uid, err = readUID(r, sc)
 			if err != nil {
-				log.Printf("auth read error: %v", err)
+				log.Printf("uid read error: %v", err)
 				uid, err = regenerateUID(w, sc)
 				if err != nil {
-					log.Printf("auth regenerate error: %v", err)
+					log.Printf("uid regenerate error: %v", err)
 					next.ServeHTTP(w, r)
 					return
 				}
