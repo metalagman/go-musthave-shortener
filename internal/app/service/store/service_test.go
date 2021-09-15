@@ -145,7 +145,7 @@ func TestMemoryStore_WriteURL(t *testing.T) {
 				counter:    tt.fields.counter,
 				db:         tt.fields.db,
 			}
-			got, err := store.WriteURL(tt.args.url)
+			got, err := store.WriteURL(tt.args.url, "test")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("WriteURL() error = %v, wantErr %v", err, tt.wantErr)
 				return

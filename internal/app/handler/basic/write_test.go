@@ -1,6 +1,9 @@
-package json
+package basic
 
 import (
+	"context"
+	"errors"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/handler"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
@@ -12,9 +15,8 @@ import (
 
 func TestWriteHandler(t *testing.T) {
 	type args struct {
-		store       store.Store
-		contentType string
-		body        string
+		store store.Store
+		body  string
 	}
 	type want struct {
 		code int
@@ -22,9 +24,10 @@ func TestWriteHandler(t *testing.T) {
 	}
 
 	s := &store.Mock{}
+	s.On("WriteURL", "https://example.org", "").Return("http://localhost/bar", nil)
 	s.On("WriteURL", "https://example.org", "test").Return("http://localhost/bar", nil)
-	s.On("WriteURL", "", "test").Return("", store.ErrBadInput)
-	s.On("WriteURL", "bad", "test").Return("", store.ErrBadInput)
+	s.On("WriteURL", "", "test").Return("", errors.New("bad url"))
+	s.On("WriteURL", "bad", "test").Return("", errors.New("bad url"))
 
 	tests := []struct {
 		name string
@@ -34,44 +37,41 @@ func TestWriteHandler(t *testing.T) {
 		{
 			"write ok",
 			args{
-				store:       s,
-				contentType: "application/json",
-				body:        "{\"url\":\"https://example.org\"}",
+				store: s,
+				body:  "https://example.org",
 			},
 			want{
 				code: http.StatusCreated,
-				body: "{\"result\":\"http://localhost/bar\"}",
+				body: "http://localhost/bar",
 			},
 		},
 		{
 			"write empty",
 			args{
-				store:       s,
-				contentType: "application/json",
-				body:        "",
+				store: s,
+				body:  "",
 			},
 			want{
 				code: http.StatusBadRequest,
-				body: "{\"error\":\"json decode: unexpected end of JSON input\"}",
+				body: "bad url\n",
 			},
 		},
 		{
 			"write bad",
 			args{
-				store:       s,
-				contentType: "application/json",
-				body:        "{\"url\":\"bad\"}",
+				store: s,
+				body:  "bad",
 			},
 			want{
 				code: http.StatusBadRequest,
-				body: "{\"error\":\"bad input\"}",
+				body: "bad url\n",
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			request := httptest.NewRequest("POST", "/api/shorten", strings.NewReader(tt.args.body))
-			request.Header.Set("Content-Type", tt.args.contentType)
+			request := httptest.NewRequest("POST", "/", strings.NewReader(tt.args.body))
+			request = request.WithContext(context.WithValue(request.Context(), handler.ContextKeyUID{}, "test"))
 			// создаём новый Recorder
 			w := httptest.NewRecorder()
 			// определяем хендлер
@@ -84,10 +84,9 @@ func TestWriteHandler(t *testing.T) {
 				t,
 				tt.want.code,
 				res.StatusCode,
-				"Expected status code %d, got %d\nBody was: %s",
+				"Expected status code %d, got %d",
 				tt.want.code,
 				w.Code,
-				resBody,
 			)
 			assert.Equal(
 				t,

@@ -13,7 +13,6 @@ import (
 )
 
 var _ Store = (*MemoryStore)(nil)
-var _ UserStore = (*MemoryStore)(nil)
 
 var ErrAlreadyServing = errors.New("already serving")
 var ErrNotServing = errors.New("not serving")
@@ -113,10 +112,6 @@ func (store *MemoryStore) Shutdown() error {
 	return nil
 }
 
-func (store *MemoryStore) WriteURL(url string) (string, error) {
-	return store.WriteUserURL(url, "")
-}
-
 func (store *MemoryStore) ReadURL(id string) (string, error) {
 	intID, err := strconv.ParseUint(id, store.base, 64)
 	if err != nil {
@@ -133,7 +128,7 @@ func (store *MemoryStore) ReadURL(id string) (string, error) {
 	return "", ErrNotFound
 }
 
-func (store *MemoryStore) WriteUserURL(url string, uid string) (string, error) {
+func (store *MemoryStore) WriteURL(url string, uid string) (string, error) {
 	if err := validateURL(url); err != nil {
 		return "", err
 	}

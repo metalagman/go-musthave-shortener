@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/handler"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/service/securecookie"
 	"log"
 	"net/http"
@@ -11,8 +12,6 @@ import (
 )
 
 const cookieNameUID string = "uid"
-
-type ContextKeyUID struct{}
 
 func SecureCookieAuth(secretKey string) func(next http.Handler) http.Handler {
 	sc := securecookie.New(secretKey)
@@ -36,7 +35,7 @@ func SecureCookieAuth(secretKey string) func(next http.Handler) http.Handler {
 			}
 
 			// inject uid into context
-			ctx := context.WithValue(r.Context(), ContextKeyUID{}, uid)
+			ctx := context.WithValue(r.Context(), handler.ContextKeyUID{}, uid)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

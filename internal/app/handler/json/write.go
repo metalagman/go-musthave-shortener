@@ -2,7 +2,7 @@ package json
 
 import (
 	"errors"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/middleware"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/handler"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
 	"net/http"
 )
@@ -15,7 +15,7 @@ type WriteHandlerResponse struct {
 	Result string `json:"result"`
 }
 
-func WriteHandler(s store.UserStore) http.HandlerFunc {
+func WriteHandler(s store.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		reqObj := &WriteHandlerRequest{}
 		err := readBody(r, reqObj)
@@ -24,7 +24,8 @@ func WriteHandler(s store.UserStore) http.HandlerFunc {
 			return
 		}
 
-		shortURL, err := s.WriteUserURL(reqObj.URL, r.Context().Value(middleware.ContextKeyUID{}).(string))
+		uid := handler.ReadContextString(r.Context(), handler.ContextKeyUID{})
+		shortURL, err := s.WriteURL(reqObj.URL, uid)
 		if err != nil {
 			if errors.Is(err, store.ErrBadInput) {
 				writeError(w, err, http.StatusBadRequest)

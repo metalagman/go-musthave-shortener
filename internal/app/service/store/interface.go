@@ -14,20 +14,15 @@ var (
 // Store of the url data
 type Store interface {
 	// WriteURL to storage, returns short URL
-	WriteURL(url string) (string, error)
+	WriteURL(url string, uid string) (string, error)
 	// ReadURL from storage
 	ReadURL(id string) (string, error)
-}
-
-// UserStore of the user urls
-type UserStore interface {
-	// WriteUserURL to db, returns short URL
-	WriteUserURL(url string, uid string) (string, error)
 	// ReadUserURLs from db
 	ReadUserURLs(uid string) []StoredURL
 }
 
 type StoredURL struct {
+	ID          string
 	ShortURL    string
 	OriginalURL string
 }
