@@ -20,9 +20,10 @@ func GzipRequestReader(next http.Handler) http.Handler {
 			log.Printf("error gzip reading request body: %v", err)
 			return
 		}
-		defer func(gz *gzip.Reader) {
+		defer func() {
 			_ = gz.Close()
-		}(gz)
+			_ = r.Body.Close()
+		}()
 
 		// replace body with gzip reader
 		r.Body = ioutil.NopCloser(gz)
