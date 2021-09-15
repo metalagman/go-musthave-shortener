@@ -17,8 +17,8 @@ func NewServer(config *Config, store store.Store) *http.Server {
 	r.Use(app.SecureCookieAuth("test secret"))
 	r.Use(app.GzipResponseWriter)
 	r.Use(app.GzipRequestReader)
-	r.With(app.JsonNegotiator).Get("/user/urls", json.UserDataHandler(store))
-	r.With(app.JsonNegotiator).Post("/api/shorten", json.WriteHandler(store))
+	r.With(app.ContentTypeJSON).Get("/user/urls", json.UserDataHandler(store))
+	r.With(app.ContentTypeJSON).Post("/api/shorten", json.WriteHandler(store))
 	r.Get("/{id:[0-9a-z]+}", basic.ReadHandler(store))
 	r.Post("/", basic.WriteHandler(store))
 
