@@ -2,6 +2,7 @@ package basic
 
 import (
 	"fmt"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/middleware"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
 	"io/ioutil"
 	"net/http"
@@ -20,7 +21,7 @@ func ReadHandler(store store.Store) http.HandlerFunc {
 	}
 }
 
-func WriteHandler(store store.Store) http.HandlerFunc {
+func WriteHandler(store store.UserStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -28,7 +29,7 @@ func WriteHandler(store store.Store) http.HandlerFunc {
 			return
 		}
 		u := string(body)
-		redirectURL, err := store.WriteURL(u)
+		redirectURL, err := store.WriteUserURL(u, r.Context().Value(middleware.ContextKeyUID{}).(string))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return

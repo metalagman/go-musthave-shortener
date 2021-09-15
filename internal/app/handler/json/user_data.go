@@ -18,11 +18,11 @@ func UserDataHandler(s store.UserStore) http.HandlerFunc {
 		rows := s.ReadUserURLs(r.Context().Value(middleware.ContextKeyUID{}).(string))
 		respObj := make(UserDataResponse, len(rows))
 
-		for _, row := range rows {
-			respObj = append(respObj, UserDataItem{
+		for i, row := range rows {
+			respObj[i] = UserDataItem{
 				ShortURL:    row.ShortURL,
 				OriginalURL: row.OriginalURL,
-			})
+			}
 		}
 
 		statusCode := http.StatusOK

@@ -41,7 +41,6 @@ type dbRow struct {
 
 func NewMemoryStore(listenAddr string, baseURL string, dbFilePath string, dbFlushInterval time.Duration) *MemoryStore {
 	return &MemoryStore{
-		counter:         30,
 		listenAddr:      listenAddr,
 		baseURL:         baseURL,
 		dbFilePath:      dbFilePath,
@@ -80,7 +79,7 @@ func (store *MemoryStore) Serve() error {
 			case <-store.dbFlushSignal:
 				return
 			case <-store.dbFlushTicker.C:
-				log.Print("timer writing db")
+				//log.Print("timer writing db")
 				store.mu.RLock()
 				_ = store.writeDB(false)
 				store.mu.RUnlock()
@@ -191,6 +190,8 @@ func (store *MemoryStore) readDB(doLock bool) error {
 	if err != nil && err != io.EOF {
 		return fmt.Errorf("decode error: %w", err)
 	}
+	store.counter = uint64(len(store.db))
+	log.Printf("db records loaded: %d", store.counter)
 
 	return nil
 }
