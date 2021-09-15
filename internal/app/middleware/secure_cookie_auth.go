@@ -24,7 +24,9 @@ func SecureCookieAuth(secretKey string) func(next http.Handler) http.Handler {
 			// reading or regenerating uid
 			uid, err = readUID(r, sc)
 			if err != nil {
-				log.Printf("uid read error: %v", err)
+				if err != http.ErrNoCookie {
+					log.Printf("uid read error: %v", err)
+				}
 				uid, err = regenerateUID(w, sc)
 				if err != nil {
 					log.Printf("uid regenerate error: %v", err)
