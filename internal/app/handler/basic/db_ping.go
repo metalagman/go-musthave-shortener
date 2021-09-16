@@ -2,6 +2,7 @@ package basic
 
 import (
 	"context"
+	_ "database/sql"
 	"github.com/jackc/pgx"
 	"log"
 	"net/http"
