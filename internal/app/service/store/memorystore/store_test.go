@@ -1,12 +1,10 @@
-package store
+package memorystore
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
-	"time"
 )
 
-func TestMemoryStore_ReadURL(t *testing.T) {
+func TestStore_ReadURL(t *testing.T) {
 	type fields struct {
 		counter uint64
 		db      db
@@ -78,7 +76,7 @@ func TestMemoryStore_ReadURL(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			store := &MemoryStore{
+			store := &Store{
 				listenAddr: "localhost:8080",
 				base:       10,
 				counter:    tt.fields.counter,
@@ -96,7 +94,7 @@ func TestMemoryStore_ReadURL(t *testing.T) {
 	}
 }
 
-func TestMemoryStore_WriteURL(t *testing.T) {
+func TestStore_WriteURL(t *testing.T) {
 	type fields struct {
 		counter uint64
 		db      db
@@ -138,7 +136,7 @@ func TestMemoryStore_WriteURL(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			store := &MemoryStore{
+			store := &Store{
 				listenAddr: "localhost:8080",
 				baseURL:    "http://localhost:8080",
 				base:       10,
@@ -155,15 +153,4 @@ func TestMemoryStore_WriteURL(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestNewMemoryStore(t *testing.T) {
-	s := NewMemoryStore(
-		"localhost:8080",
-		"http://localhost:8080",
-		"urls.gob",
-		time.Second,
-	)
-	assert.NotNil(t, s)
-	assert.Equal(t, s.listenAddr, "localhost:8080")
 }

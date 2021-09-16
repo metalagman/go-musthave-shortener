@@ -5,8 +5,8 @@ import (
 	"net/url"
 )
 
-// validateURL checks if input is valid url
-func validateURL(str string) error {
+// ValidateURL checks if input is valid url
+func ValidateURL(str string) error {
 	if str == "" {
 		return ErrEmptyInput
 	}

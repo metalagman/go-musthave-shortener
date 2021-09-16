@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-playground/validator/v10"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store/memorystore"
 	"log"
 	"net/http"
 	"os"
@@ -46,14 +46,14 @@ func main() {
 }
 
 func serve(ctx context.Context, config *Config) (err error) {
-	s := store.NewMemoryStore(
-		config.ListenAddr,
-		config.BaseURL,
-		config.StorageFilePath,
-		config.StorageFlushInterval,
+	s := memorystore.NewStore(
+		memorystore.WithBaseURL(config.BaseURL),
+		memorystore.WithListenAddr(config.ListenAddr),
+		memorystore.WithFilePath(config.StorageFilePath),
+		memorystore.WithFlushInterval(config.StorageFlushInterval),
 	)
 
-	if err := s.Serve(); err != nil {
+	if err := s.Start(); err != nil {
 		return fmt.Errorf("store serve failed: %w", err)
 	}
 
@@ -70,7 +70,7 @@ func serve(ctx context.Context, config *Config) (err error) {
 	<-ctx.Done()
 	log.Printf("server stopped")
 
-	if err = s.Shutdown(); err != nil {
+	if err = s.Stop(); err != nil {
 		return fmt.Errorf("store shutdown failed: %w", err)
 	}
 

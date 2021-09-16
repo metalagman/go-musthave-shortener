@@ -6,11 +6,11 @@ import (
 	"github.com/russianlagman/go-musthave-shortener/internal/app/handler/basic"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/handler/json"
 	app "github.com/russianlagman/go-musthave-shortener/internal/app/middleware"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store/memorystore"
 	"net/http"
 )
 
-func NewServer(config *Config, store *store.MemoryStore) *http.Server {
+func NewServer(config *Config, store *memorystore.Store) *http.Server {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)

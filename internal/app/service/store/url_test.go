@@ -38,8 +38,8 @@ func Test_ValidateUrl(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := validateURL(tt.args.str); !errors.Is(got, tt.wantErr) {
-				t.Errorf("validateURL() = %v, wantErr %v", got, tt.wantErr)
+			if got := ValidateURL(tt.args.str); !errors.Is(got, tt.wantErr) {
+				t.Errorf("ValidateURL() = %v, wantErr %v", got, tt.wantErr)
 			}
 		})
 	}
