@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func DbPingHandler(dsn string) http.HandlerFunc {
+func PingHandler(dsn string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		connConfig, err := pgx.ParseURI(dsn)
 		if err != nil {

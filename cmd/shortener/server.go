@@ -21,7 +21,7 @@ func NewServer(config *Config, store *store.MemoryStore) *http.Server {
 	r.With(app.ContentTypeJSON).Post("/api/shorten", json.WriteHandler(store))
 	r.Get("/{id:[0-9a-z]+}", basic.ReadHandler(store))
 	r.Post("/", basic.WriteHandler(store))
-	r.Get("/ping", basic.DbPingHandler(config.DSN))
+	r.Get("/ping", basic.PingHandler(config.DSN))
 
 	return &http.Server{
 		Addr:    config.ListenAddr,
