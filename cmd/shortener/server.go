@@ -14,7 +14,7 @@ func NewServer(config *Config, store *memorystore.Store) *http.Server {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(app.SecureCookieAuth("test secret"))
+	r.Use(app.SecureCookieAuth(config.SecretKey))
 	r.Use(app.GzipResponseWriter)
 	r.Use(app.GzipRequestReader)
 	r.Get("/user/urls", json.UserDataHandler(store))

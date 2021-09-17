@@ -19,6 +19,7 @@ func PingHandler(URI string) http.HandlerFunc {
 		}()
 
 		if err := db.Ping(); err != nil {
+			log.Printf("ping error: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
