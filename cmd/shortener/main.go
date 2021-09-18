@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-playground/validator/v10"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store/memorystore"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store/sqlstore"
 	"log"
 	"net/http"
 	"os"
@@ -46,11 +46,10 @@ func main() {
 }
 
 func serve(ctx context.Context, config *Config) (err error) {
-	s := memorystore.NewStore(
-		memorystore.WithBaseURL(config.BaseURL),
-		memorystore.WithListenAddr(config.ListenAddr),
-		memorystore.WithFilePath(config.StorageFilePath),
-		memorystore.WithFlushInterval(config.StorageFlushInterval),
+	s := sqlstore.NewStore(
+		sqlstore.WithBaseURL(config.BaseURL),
+		sqlstore.WithListenAddr(config.ListenAddr),
+		sqlstore.WithDSN(config.DSN),
 	)
 
 	if err := s.Start(); err != nil {
