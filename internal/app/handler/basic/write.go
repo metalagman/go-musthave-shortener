@@ -17,7 +17,6 @@ func WriteHandler(store store.Store) http.HandlerFunc {
 		}
 		u := string(body)
 		uid := handler.ReadContextString(r.Context(), handler.ContextKeyUID{})
-		fmt.Printf("\n\n\t\tuid: %v\n\n", uid)
 		redirectURL, err := store.WriteURL(u, uid)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)

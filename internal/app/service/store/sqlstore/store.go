@@ -38,9 +38,7 @@ RETURNING id`
 		return "", fmt.Errorf("write url query: %w", err)
 	}
 
-	id := s.fromRawID(rawID)
-
-	return id, err
+	return fmt.Sprintf("%s/%s", s.baseURL, s.fromRawID(rawID)), nil
 }
 
 func (s *Store) ReadUserURLs(uid string) []store.StoredURL {
