@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/go-playground/validator/v10"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store/sqlstore"
 	"log"
 	"net/http"
@@ -29,16 +28,16 @@ func main() {
 		log.Fatalf("config load error: %v", err)
 	}
 
-	if err := c.Validate(); err != nil {
-		for _, err := range err.(validator.ValidationErrors) {
-			log.Fatalf(
-				"invalid value %s for config param %s, expected format: %s",
-				err.Value(),
-				err.StructField(),
-				err.ActualTag(),
-			)
-		}
-	}
+	//if err := c.Validate(); err != nil {
+	//	for _, err := range err.(validator.ValidationErrors) {
+	//		log.Fatalf(
+	//			"invalid value %s for config param %s, expected format: %s",
+	//			err.Value(),
+	//			err.StructField(),
+	//			err.ActualTag(),
+	//		)
+	//	}
+	//}
 
 	if err := serve(ctx, c); err != nil {
 		log.Printf("failed to serve: %+v\n", err)

@@ -73,13 +73,13 @@ func (s *Store) Stop() error {
 }
 
 func (s *Store) createTables() error {
-	sql := `CREATE TABLE IF NOT EXISTS "urls" (
+	q := `CREATE TABLE IF NOT EXISTS "urls" (
     id BIGSERIAL primary key,
   	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 	uid UUID,
 	original_url TEXT
 );`
-	stmt, err := s.db.Prepare(sql)
+	stmt, err := s.db.Prepare(q)
 	if err != nil {
 		return fmt.Errorf("prepare: %w", err)
 	}
