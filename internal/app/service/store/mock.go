@@ -18,7 +18,7 @@ func (m *Mock) ReadURL(id string) (string, error) {
 	return args.String(0), args.Error(1)
 }
 
-func (m *Mock) ReadAllURLs(uid string) []Record {
+func (m *Mock) ReadUserData(uid string) []Record {
 	args := m.Called(uid)
 	return args.Get(0).([]Record)
 }

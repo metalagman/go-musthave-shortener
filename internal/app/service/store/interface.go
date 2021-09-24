@@ -39,8 +39,8 @@ type Reader interface {
 }
 
 type UserDataReader interface {
-	// ReadAllURLs from db
-	ReadAllURLs(uid string) []Record
+	// ReadUserData from db
+	ReadUserData(uid string) []Record
 }
 
 type Writer interface {

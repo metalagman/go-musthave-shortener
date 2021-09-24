@@ -69,7 +69,7 @@ func (s *Store) WriteURL(url string, uid string) (string, error) {
 	return s.shortURL(s.idFromInt64(rawID)), nil
 }
 
-func (s *Store) ReadAllURLs(uid string) []store.Record {
+func (s *Store) ReadUserData(uid string) []store.Record {
 	var result []store.Record
 
 	rows, err := s.db.Query(_readAllSQL, uid)

@@ -47,7 +47,7 @@ func (s *Store) WriteURL(url string, uid string) (string, error) {
 	return shortURL, nil
 }
 
-func (s *Store) ReadAllURLs(uid string) []store.Record {
+func (s *Store) ReadUserData(uid string) []store.Record {
 	var result []store.Record
 	for _, row := range s.db {
 		if row.UID != uid {
