@@ -7,6 +7,7 @@ require (
 	github.com/go-chi/chi/v5 v5.0.3
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/google/uuid v1.3.0 // indirect
+	github.com/jackc/pgerrcode v0.0.0-20201024163028-a0d42d470451 // indirect
 	github.com/jackc/pgx v3.6.2+incompatible // indirect
 	github.com/joho/godotenv v1.3.0
 	github.com/lib/pq v1.10.3 // indirect

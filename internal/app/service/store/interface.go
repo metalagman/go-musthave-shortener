@@ -7,9 +7,18 @@ import (
 
 var (
 	ErrBadInput   = errors.New("bad input")
-	ErrEmptyInput = fmt.Errorf("%w: empty url", ErrBadInput)
+	ErrEmptyInput = fmt.Errorf("empty url: %w", ErrBadInput)
 	ErrNotFound   = errors.New("not found")
+	ErrConflict   = &ConflictError{}
 )
+
+type ConflictError struct {
+	ExistingURL string
+}
+
+func (e ConflictError) Error() string {
+	return "conflict"
+}
 
 // Ping allows you to perform store health check
 type Ping interface {

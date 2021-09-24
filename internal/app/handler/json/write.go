@@ -27,6 +27,12 @@ func WriteHandler(s store.Writer) http.HandlerFunc {
 		uid := handler.ReadContextString(r.Context(), handler.ContextKeyUID{})
 		shortURL, err := s.WriteURL(reqObj.URL, uid)
 		if err != nil {
+			var errConflict *store.ConflictError
+			if errors.As(err, &errConflict) {
+				respObj := &WriteHandlerResponse{Result: errConflict.ExistingURL}
+				writeResponse(w, respObj, http.StatusConflict)
+				return
+			}
 			if errors.Is(err, store.ErrBadInput) {
 				writeError(w, err, http.StatusBadRequest)
 			} else {

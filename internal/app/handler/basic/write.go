@@ -1,6 +1,7 @@
 package basic
 
 import (
+	"errors"
 	"fmt"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/handler"
 	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
@@ -19,6 +20,12 @@ func WriteHandler(s store.Writer) http.HandlerFunc {
 		uid := handler.ReadContextString(r.Context(), handler.ContextKeyUID{})
 		redirectURL, err := s.WriteURL(u, uid)
 		if err != nil {
+			var errConflict *store.ConflictError
+			if errors.As(err, &errConflict) {
+				w.WriteHeader(http.StatusConflict)
+				_, _ = w.Write([]byte(errConflict.ExistingURL))
+				return
+			}
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
