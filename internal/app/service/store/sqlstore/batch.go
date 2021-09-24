@@ -24,22 +24,13 @@ func (s *Store) BatchWrite(uid string, in []store.Record) ([]store.Record, error
 			_ = stmt.Close()
 		}(stmt)
 		for i := range in {
-			res, err := stmt.Query(uid, in[i].OriginalURL)
+			var rawID int64
+			err := stmt.QueryRow(uid, in[i].OriginalURL).Scan(&rawID)
 			if err != nil {
-				return fmt.Errorf("query: %w", err)
+				return fmt.Errorf("sql query: %w", err)
 			}
-
-			var id int64
-			res.Next()
-			if err := res.Scan(&id); err != nil {
-				return fmt.Errorf("scan: %w", err)
-			}
-
-			if err := res.Close(); err != nil {
-				return fmt.Errorf("rows close: %w", err)
-			}
-			in[i].ID = s.idFromInt64(id)
-			in[i].ShortURL = s.shortUrl(in[i].ID)
+			in[i].ID = s.idFromInt64(rawID)
+			in[i].ShortURL = s.shortURL(in[i].ID)
 		}
 		return nil
 	})

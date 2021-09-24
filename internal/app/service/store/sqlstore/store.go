@@ -58,7 +58,7 @@ func (s *Store) WriteURL(url string, uid string) (string, error) {
 					return "", fmt.Errorf("query conflicting id: %w", err)
 				}
 				return "", &store.ConflictError{
-					ExistingURL: s.shortUrl(s.idFromInt64(rawID)),
+					ExistingURL: s.shortURL(s.idFromInt64(rawID)),
 				}
 			}
 		}
@@ -66,7 +66,7 @@ func (s *Store) WriteURL(url string, uid string) (string, error) {
 		return "", fmt.Errorf("write url query: %w", err)
 	}
 
-	return s.shortUrl(s.idFromInt64(rawID)), nil
+	return s.shortURL(s.idFromInt64(rawID)), nil
 }
 
 func (s *Store) ReadAllURLs(uid string) []store.Record {
@@ -93,7 +93,7 @@ func (s *Store) ReadAllURLs(uid string) []store.Record {
 		result = append(result, store.Record{
 			ID:          id,
 			OriginalURL: originalURL,
-			ShortURL:    s.shortUrl(id),
+			ShortURL:    s.shortURL(id),
 		})
 	}
 
@@ -114,7 +114,7 @@ func (s *Store) idToInt64(id string) (int64, error) {
 	return rawID, nil
 }
 
-// shortUrl returns short url of the id
-func (s *Store) shortUrl(id string) string {
+// shortURL returns short url of the id
+func (s *Store) shortURL(id string) string {
 	return fmt.Sprintf("%s/%s", s.baseURL, id)
 }
