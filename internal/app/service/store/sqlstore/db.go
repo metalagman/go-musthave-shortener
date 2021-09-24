@@ -12,10 +12,11 @@ func (s *Store) inTransaction(cb func(tx *sql.Tx) error) error {
 	}
 
 	if err := cb(tx); err != nil {
+		err = fmt.Errorf("callback: %w", err)
 		if err := tx.Rollback(); err != nil {
-			return fmt.Errorf("tx rollback: %w", err)
+			return fmt.Errorf("rollback: %w", err)
 		}
-		return fmt.Errorf("callback: %w", err)
+		return err
 	}
 
 	if err := tx.Commit(); err != nil {

@@ -12,7 +12,7 @@ var _ store.BatchWriter = (*Store)(nil)
 const _batchWriteSQL = `
 INSERT INTO urls (uid, original_url)
 VALUES ($1, $2)
-`
+RETURNING id`
 
 func (s *Store) BatchWrite(uid string, in []store.Record) ([]store.Record, error) {
 	err := s.inTransaction(func(tx *sql.Tx) error {
@@ -20,14 +20,23 @@ func (s *Store) BatchWrite(uid string, in []store.Record) ([]store.Record, error
 		if err != nil {
 			return fmt.Errorf("sql prepare: %w", err)
 		}
+		defer func(stmt *sql.Stmt) {
+			_ = stmt.Close()
+		}(stmt)
 		for i := range in {
-			res, err := stmt.Exec(uid, in[i].OriginalURL)
+			res, err := stmt.Query(uid, in[i].OriginalURL)
 			if err != nil {
-				return fmt.Errorf("exec: %w", err)
+				return fmt.Errorf("query: %w", err)
 			}
-			id, err := res.LastInsertId()
-			if err != nil {
-				return fmt.Errorf("last insert id: %w", err)
+
+			var id int64
+			res.Next()
+			if err := res.Scan(&id); err != nil {
+				return fmt.Errorf("scan: %w", err)
+			}
+
+			if err := res.Close(); err != nil {
+				return fmt.Errorf("rows close: %w", err)
 			}
 			in[i].ID = s.idFromInt64(id)
 			in[i].ShortURL = s.shortUrl(in[i].ID)

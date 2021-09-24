@@ -20,7 +20,7 @@ type BatchWriteResponseItem struct {
 func BatchWriteHandler(s store.BatchWriter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		reqObj := make([]BatchWriteRequestItem, 0)
-		err := readBody(r, reqObj)
+		err := readBody(r, &reqObj)
 		if err != nil {
 			writeError(w, err, http.StatusBadRequest)
 			return
