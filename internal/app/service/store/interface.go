@@ -20,8 +20,8 @@ type Ping interface {
 // Store of the url data
 type Store interface {
 	Reader
-	UserWriter
-	UserReader
+	Writer
+	UserDataReader
 }
 
 type Reader interface {
@@ -29,23 +29,25 @@ type Reader interface {
 	ReadURL(id string) (string, error)
 }
 
+type UserDataReader interface {
+	// ReadAllURLs from db
+	ReadAllURLs(uid string) []Record
+}
+
 type Writer interface {
-	// WriteURL from storage using provided id
-	WriteURL(id string) (string, error)
+	// WriteURL to storage, returns short Record
+	WriteURL(url string, uid string) (string, error)
 }
 
-type UserReader interface {
-	// ReadUserURLs from db
-	ReadUserURLs(uid string) []StoredURL
+type BatchWriter interface {
+	BatchWrite(uid string, in []Record) ([]Record, error)
 }
 
-type UserWriter interface {
-	// WriteUserURL to storage, returns short URL
-	WriteUserURL(url string, uid string) (string, error)
-}
+type RecordID string
 
-type StoredURL struct {
-	ID          string
-	ShortURL    string
-	OriginalURL string
+type Record struct {
+	ID            string
+	ShortURL      string
+	OriginalURL   string
+	CorrelationID string
 }

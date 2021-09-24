@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func WriteHandler(s store.UserWriter) http.HandlerFunc {
+func WriteHandler(s store.Writer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -17,7 +17,7 @@ func WriteHandler(s store.UserWriter) http.HandlerFunc {
 		}
 		u := string(body)
 		uid := handler.ReadContextString(r.Context(), handler.ContextKeyUID{})
-		redirectURL, err := s.WriteUserURL(u, uid)
+		redirectURL, err := s.WriteURL(u, uid)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return

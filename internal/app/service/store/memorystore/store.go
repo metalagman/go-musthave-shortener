@@ -25,7 +25,7 @@ func (s *Store) ReadURL(id string) (string, error) {
 	return "", store.ErrNotFound
 }
 
-func (s *Store) WriteUserURL(url string, uid string) (string, error) {
+func (s *Store) WriteURL(url string, uid string) (string, error) {
 	if err := store.ValidateURL(url); err != nil {
 		return "", err
 	}
@@ -47,13 +47,13 @@ func (s *Store) WriteUserURL(url string, uid string) (string, error) {
 	return shortURL, nil
 }
 
-func (s *Store) ReadUserURLs(uid string) []store.StoredURL {
-	var result []store.StoredURL
+func (s *Store) ReadAllURLs(uid string) []store.Record {
+	var result []store.Record
 	for _, row := range s.db {
 		if row.UID != uid {
 			continue
 		}
-		result = append(result, store.StoredURL{
+		result = append(result, store.Record{
 			OriginalURL: row.OriginalURL,
 			ShortURL:    row.ShortURL,
 		})

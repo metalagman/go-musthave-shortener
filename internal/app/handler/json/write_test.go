@@ -24,9 +24,9 @@ func TestWriteHandler(t *testing.T) {
 	}
 
 	s := &store.Mock{}
-	s.On("WriteUserURL", "https://example.org", "test").Return("http://localhost/bar", nil)
-	s.On("WriteUserURL", "", "test").Return("", store.ErrBadInput)
-	s.On("WriteUserURL", "bad", "test").Return("", store.ErrBadInput)
+	s.On("WriteURL", "https://example.org", "test").Return("http://localhost/bar", nil)
+	s.On("WriteURL", "", "test").Return("", store.ErrBadInput)
+	s.On("WriteURL", "bad", "test").Return("", store.ErrBadInput)
 
 	tests := []struct {
 		name string

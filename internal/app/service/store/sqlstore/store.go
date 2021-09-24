@@ -27,7 +27,11 @@ SELECT original_url FROM urls WHERE id=$1`
 	return url, err
 }
 
-func (s *Store) WriteUserURL(url string, uid string) (string, error) {
+func (s *Store) WriteURL(url string, uid string) (string, error) {
+	if err := store.ValidateURL(url); err != nil {
+		return "", err
+	}
+
 	q := `
 INSERT INTO urls (uid, original_url)
 VALUES ($1, $2)
@@ -41,8 +45,8 @@ RETURNING id`
 	return fmt.Sprintf("%s/%s", s.baseURL, s.fromRawID(rawID)), nil
 }
 
-func (s *Store) ReadUserURLs(uid string) []store.StoredURL {
-	var result []store.StoredURL
+func (s *Store) ReadAllURLs(uid string) []store.Record {
+	var result []store.Record
 
 	q := `
 SELECT id, original_url FROM urls WHERE uid=$1`
@@ -63,7 +67,7 @@ SELECT id, original_url FROM urls WHERE uid=$1`
 			log.Printf("scan error: %v", err)
 			break
 		}
-		result = append(result, store.StoredURL{
+		result = append(result, store.Record{
 			ID:          s.fromRawID(rawID),
 			OriginalURL: originalURL,
 			ShortURL:    fmt.Sprintf("%s/%s", s.baseURL, s.fromRawID(rawID)),
@@ -85,4 +89,23 @@ func (s *Store) toRawID(id string) (uint64, error) {
 		return 0, fmt.Errorf("invalid id %q: %w", id, store.ErrBadInput)
 	}
 	return rawID, nil
+}
+
+// idFromInt64 converts sql id to short string id
+func (s *Store) idFromInt64(id int64) string {
+	return strconv.FormatInt(id, s.base)
+}
+
+// idToInt64 converts short string id to sql id
+func (s *Store) idToInt64(id string) (int64, error) {
+	rawID, err := strconv.ParseInt(id, s.base, 64)
+	if err != nil {
+		return 0, fmt.Errorf("invalid id %q: %w", id, store.ErrBadInput)
+	}
+	return rawID, nil
+}
+
+// shortUrl returns short url of the id
+func (s *Store) shortUrl(id string) string {
+	return fmt.Sprintf("%s/%s", s.baseURL, id)
 }

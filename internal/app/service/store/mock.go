@@ -8,7 +8,7 @@ type Mock struct {
 
 var _ Store = (*Mock)(nil)
 
-func (m *Mock) WriteUserURL(url string, uid string) (string, error) {
+func (m *Mock) WriteURL(url string, uid string) (string, error) {
 	args := m.Called(url, uid)
 	return args.String(0), args.Error(1)
 }
@@ -18,7 +18,7 @@ func (m *Mock) ReadURL(id string) (string, error) {
 	return args.String(0), args.Error(1)
 }
 
-func (m *Mock) ReadUserURLs(uid string) []StoredURL {
+func (m *Mock) ReadAllURLs(uid string) []Record {
 	args := m.Called(uid)
-	return args.Get(0).([]StoredURL)
+	return args.Get(0).([]Record)
 }

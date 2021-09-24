@@ -13,11 +13,11 @@ type UserDataItem struct {
 	OriginalURL string `json:"original_url"`
 }
 
-func UserDataHandler(s store.UserReader) http.HandlerFunc {
+func UserDataHandler(s store.UserDataReader) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		rows := s.ReadUserURLs(handler.ReadContextString(r.Context(), handler.ContextKeyUID{}))
+		rows := s.ReadAllURLs(handler.ReadContextString(r.Context(), handler.ContextKeyUID{}))
 		respObj := make(UserDataResponse, len(rows))
 
 		for i, row := range rows {

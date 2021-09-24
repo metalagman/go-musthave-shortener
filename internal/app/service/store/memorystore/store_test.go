@@ -143,13 +143,13 @@ func TestStore_WriteURL(t *testing.T) {
 				counter:    tt.fields.counter,
 				db:         tt.fields.db,
 			}
-			got, err := store.WriteUserURL(tt.args.url, "test")
+			got, err := store.WriteURL(tt.args.url, "test")
 			if (err != nil) != tt.wantErr {
-				t.Errorf("WriteUserURL() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("WriteURL() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("WriteUserURL() got = %v, wantErr %v", got, tt.want)
+				t.Errorf("WriteURL() got = %v, wantErr %v", got, tt.want)
 			}
 		})
 	}

@@ -22,6 +22,7 @@ func NewServer(config *Config, store *sqlstore.Store) *http.Server {
 	r.Get("/{id:[0-9a-z]+}", basic.ReadHandler(store))
 	r.Post("/", basic.WriteHandler(store))
 	r.Get("/ping", basic.PingHandler(store))
+	r.Post("/api/shorten/batch", json.BatchWriteHandler(store))
 
 	return &http.Server{
 		Addr:    config.ListenAddr,
