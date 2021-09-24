@@ -6,10 +6,10 @@ import (
 	"strings"
 )
 
-func ReadHandler(store store.Store) http.HandlerFunc {
+func ReadHandler(s store.Reader) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := strings.TrimPrefix(r.URL.Path, "/")
-		u, err := store.ReadURL(id)
+		u, err := s.ReadURL(id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return

@@ -27,7 +27,7 @@ SELECT original_url FROM urls WHERE id=$1`
 	return url, err
 }
 
-func (s *Store) WriteURL(url string, uid string) (string, error) {
+func (s *Store) WriteUserURL(url string, uid string) (string, error) {
 	q := `
 INSERT INTO urls (uid, original_url)
 VALUES ($1, $2)

@@ -15,7 +15,7 @@ type WriteHandlerResponse struct {
 	Result string `json:"result"`
 }
 
-func WriteHandler(s store.Store) http.HandlerFunc {
+func WriteHandler(s store.UserWriter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		reqObj := &WriteHandlerRequest{}
 		err := readBody(r, reqObj)
@@ -25,7 +25,7 @@ func WriteHandler(s store.Store) http.HandlerFunc {
 		}
 
 		uid := handler.ReadContextString(r.Context(), handler.ContextKeyUID{})
-		shortURL, err := s.WriteURL(reqObj.URL, uid)
+		shortURL, err := s.WriteUserURL(reqObj.URL, uid)
 		if err != nil {
 			if errors.Is(err, store.ErrBadInput) {
 				writeError(w, err, http.StatusBadRequest)

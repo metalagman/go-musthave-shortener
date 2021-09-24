@@ -13,7 +13,7 @@ type UserDataItem struct {
 	OriginalURL string `json:"original_url"`
 }
 
-func UserDataHandler(s store.Store) http.HandlerFunc {
+func UserDataHandler(s store.UserReader) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 

@@ -8,7 +8,7 @@ type Mock struct {
 
 var _ Store = (*Mock)(nil)
 
-func (m *Mock) WriteURL(url string, uid string) (string, error) {
+func (m *Mock) WriteUserURL(url string, uid string) (string, error) {
 	args := m.Called(url, uid)
 	return args.String(0), args.Error(1)
 }
