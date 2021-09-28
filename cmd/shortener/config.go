@@ -15,12 +15,14 @@ import (
 type Config struct {
 	ListenAddr           string `env:"SERVER_ADDRESS,required" envDefault:"localhost:8080" validate:"required,hostname_port"`
 	BaseURL              string `env:"BASE_URL,required" envDefault:"http://localhost:8080" validate:"required,base_url"`
-	StorageFilePath      string `env:"FILE_STORAGE_PATH,required" envDefault:"urls.gob" validate:"required,file"`
+	StorageFilePath      string `env:"FILE_STORAGE_PATH,required" envDefault:"urls.gob" validate:"required"`
+	SecretKey            string `env:"SECRET_KEY,required" envDefault:"change_me" validate:"required"`
+	DSN                  string `env:"DATABASE_DSN"`
 	StorageFlushInterval time.Duration
 }
 
 func NewConfig() *Config {
-	return &Config{StorageFlushInterval: time.Second * 1}
+	return &Config{StorageFlushInterval: time.Second * 5}
 }
 
 // Load config from environment and from .env file (if exists) and from flags
@@ -37,6 +39,7 @@ func (config *Config) Load() error {
 	pflag.StringVarP(&config.ListenAddr, "listen-addr", "a", config.ListenAddr, "Server address to listen on")
 	pflag.StringVarP(&config.BaseURL, "base-url", "b", config.BaseURL, "Base URL for shortened links")
 	pflag.StringVarP(&config.StorageFilePath, "storage-file-path", "f", config.StorageFilePath, "Storage file path")
+	pflag.StringVarP(&config.DSN, "dsn", "d", config.DSN, "Database connection DSN")
 	pflag.Parse()
 
 	return nil

@@ -3,11 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/handlers/basic"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/handlers/json"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/services/shortener"
+	"github.com/go-playground/validator/v10"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store/sqlstore"
 	"log"
 	"net/http"
 	"os"
@@ -32,60 +29,47 @@ func main() {
 		log.Fatalf("config load error: %v", err)
 	}
 
-	//if err := c.Validate(); err != nil {
-	//	for _, err := range err.(validator.ValidationErrors) {
-	//		log.Fatalf(
-	//			"invalid value %s for config param %s, expected format: %s",
-	//			err.Value(),
-	//			err.StructField(),
-	//			err.ActualTag(),
-	//		)
-	//	}
-	//}
+	if err := c.Validate(); err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			log.Fatalf(
+				"invalid value %s for config param %s, expected format: %s",
+				err.Value(),
+				err.StructField(),
+				err.ActualTag(),
+			)
+		}
+	}
 
-	if err := serve(ctx, *c); err != nil {
+	if err := serve(ctx, c); err != nil {
 		log.Printf("failed to serve: %+v\n", err)
 	}
 }
 
-func serve(ctx context.Context, config Config) (err error) {
-	store := shortener.NewMemoryStore(
-		config.ListenAddr,
-		config.BaseURL,
-		config.StorageFilePath,
-		config.StorageFlushInterval,
+func serve(ctx context.Context, config *Config) (err error) {
+	s := sqlstore.NewStore(
+		sqlstore.WithBaseURL(config.BaseURL),
+		sqlstore.WithListenAddr(config.ListenAddr),
+		sqlstore.WithDSN(config.DSN),
 	)
 
-	if err := store.Serve(); err != nil {
+	if err := s.Start(); err != nil {
 		return fmt.Errorf("store serve failed: %w", err)
 	}
 
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Get("/{id:[0-9a-z]+}", basic.ReadHandler(store))
-	r.Post("/api/shorten", json.WriteHandler(store))
-	r.Post("/", basic.WriteHandler(store))
-	log.Printf("listening on %s", config.ListenAddr)
-	log.Printf("base url %s", config.BaseURL)
-
-	srv := &http.Server{
-		Addr:    config.ListenAddr,
-		Handler: r,
-	}
-
+	srv := NewServer(config, s)
 	go func() {
+		log.Printf("listening on %s", config.ListenAddr)
+		log.Printf("base url %s", config.BaseURL)
 		if err = srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %+v\n", err)
 		}
 	}()
 
 	log.Printf("server started")
-
 	<-ctx.Done()
-
 	log.Printf("server stopped")
 
-	if err = store.Shutdown(); err != nil {
+	if err = s.Stop(); err != nil {
 		return fmt.Errorf("store shutdown failed: %w", err)
 	}
 

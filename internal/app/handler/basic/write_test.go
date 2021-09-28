@@ -1,8 +1,10 @@
-package json
+package basic
 
 import (
+	"context"
 	"errors"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/services/shortener"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/handler"
+	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
@@ -13,19 +15,19 @@ import (
 
 func TestWriteHandler(t *testing.T) {
 	type args struct {
-		store       shortener.Store
-		contentType string
-		body        string
+		store store.Store
+		body  string
 	}
 	type want struct {
 		code int
 		body string
 	}
 
-	store := &shortener.StoreMock{}
-	store.On("WriteURL", "https://example.org").Return("http://localhost/bar", nil)
-	store.On("WriteURL", "").Return("", errors.New("bad url"))
-	store.On("WriteURL", "bad").Return("", errors.New("bad url"))
+	s := &store.Mock{}
+	s.On("WriteURL", "https://example.org", "").Return("http://localhost/bar", nil)
+	s.On("WriteURL", "https://example.org", "test").Return("http://localhost/bar", nil)
+	s.On("WriteURL", "", "test").Return("", errors.New("bad url"))
+	s.On("WriteURL", "bad", "test").Return("", errors.New("bad url"))
 
 	tests := []struct {
 		name string
@@ -35,33 +37,30 @@ func TestWriteHandler(t *testing.T) {
 		{
 			"write ok",
 			args{
-				store:       store,
-				contentType: "application/json",
-				body:        "{\"url\":\"https://example.org\"}",
+				store: s,
+				body:  "https://example.org",
 			},
 			want{
 				code: http.StatusCreated,
-				body: "{\"result\":\"http://localhost/bar\"}",
+				body: "http://localhost/bar",
 			},
 		},
 		{
 			"write empty",
 			args{
-				store:       store,
-				contentType: "application/json",
-				body:        "",
+				store: s,
+				body:  "",
 			},
 			want{
 				code: http.StatusBadRequest,
-				body: "json read error: unexpected end of JSON input\n",
+				body: "bad url\n",
 			},
 		},
 		{
 			"write bad",
 			args{
-				store:       store,
-				contentType: "application/json",
-				body:        "{\"url\":\"bad\"}",
+				store: s,
+				body:  "bad",
 			},
 			want{
 				code: http.StatusBadRequest,
@@ -71,12 +70,12 @@ func TestWriteHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			request := httptest.NewRequest("POST", "/api/shorten", strings.NewReader(tt.args.body))
-			request.Header.Set("Content-Type", tt.args.contentType)
+			request := httptest.NewRequest("POST", "/", strings.NewReader(tt.args.body))
+			request = request.WithContext(context.WithValue(request.Context(), handler.ContextKeyUID{}, "test"))
 			// создаём новый Recorder
 			w := httptest.NewRecorder()
 			// определяем хендлер
-			h := WriteHandler(store)
+			h := WriteHandler(s)
 			// запускаем сервер
 			h.ServeHTTP(w, request)
 			res := w.Result()
