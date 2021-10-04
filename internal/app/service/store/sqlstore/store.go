@@ -10,31 +10,20 @@ import (
 	"strconv"
 )
 
-const (
-	_writeSQL = `
-INSERT INTO urls (uid, original_url)
-VALUES ($1, $2)
-RETURNING id
-`
-	_readSQL = `
-SELECT original_url FROM urls WHERE id=$1
-`
-	_readAllSQL = `
-SELECT id, original_url FROM urls WHERE uid=$1
-`
-)
-
 // store.Store interface implementation
 var _ store.Store = (*Store)(nil)
 
 func (s *Store) ReadURL(id string) (string, error) {
+	const readSQL = `
+		SELECT original_url FROM urls WHERE id=$1
+`
 	rawID, err := s.idToInt64(id)
 	if err != nil {
 		return "", fmt.Errorf("invalid id %q: %w", id, store.ErrBadInput)
 	}
 
 	var url string
-	err = s.db.QueryRow(_readSQL, rawID).Scan(&url)
+	err = s.db.QueryRow(readSQL, rawID).Scan(&url)
 	if err != nil {
 		return "", fmt.Errorf("read url query: %w", err)
 	}
@@ -43,12 +32,18 @@ func (s *Store) ReadURL(id string) (string, error) {
 }
 
 func (s *Store) WriteURL(url string, uid string) (string, error) {
+	const writeSQL = `
+		INSERT INTO urls (uid, original_url)
+		VALUES ($1, $2)
+		RETURNING id
+`
+
 	if err := store.ValidateURL(url); err != nil {
 		return "", err
 	}
 
 	var rawID int64
-	err := s.db.QueryRow(_writeSQL, uid, url).Scan(&rawID)
+	err := s.db.QueryRow(writeSQL, uid, url).Scan(&rawID)
 	if err != nil {
 		var pgErr *pg.Error
 		if errors.As(err, &pgErr) {
@@ -70,9 +65,13 @@ func (s *Store) WriteURL(url string, uid string) (string, error) {
 }
 
 func (s *Store) ReadUserData(uid string) []store.Record {
+	const readAllSQL = `
+		SELECT id, original_url FROM urls WHERE uid=$1
+`
+
 	var result []store.Record
 
-	rows, err := s.db.Query(_readAllSQL, uid)
+	rows, err := s.db.Query(readAllSQL, uid)
 	if err != nil {
 		return result
 	}
