@@ -6,16 +6,15 @@ import (
 )
 
 type Store struct {
-	listenAddr string
-	baseURL    string
-	dsn        string
-	base       int
+	baseURL string
+	dsn     string
+	base    int
 
 	db *sql.DB
 }
 
-// NewStore constructor
-func NewStore(opts ...StoreOption) *Store {
+// New constructor
+func New(opts ...Option) *Store {
 	const (
 		defaultBase = 36
 	)
@@ -31,21 +30,15 @@ func NewStore(opts ...StoreOption) *Store {
 	return s
 }
 
-type StoreOption func(*Store)
+type Option func(*Store)
 
-func WithListenAddr(addr string) StoreOption {
-	return func(s *Store) {
-		s.listenAddr = addr
-	}
-}
-
-func WithBaseURL(url string) StoreOption {
+func WithBaseURL(url string) Option {
 	return func(s *Store) {
 		s.baseURL = url
 	}
 }
 
-func WithDSN(dsn string) StoreOption {
+func WithDSN(dsn string) Option {
 	return func(s *Store) {
 		s.dsn = dsn
 	}
