@@ -25,3 +25,5 @@ vendor/
 # dotenv files
 .env
 urls.gob
+
+.build
