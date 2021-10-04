@@ -2,9 +2,9 @@ package basic
 
 import (
 	_ "github.com/lib/pq"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
 	"log"
 	"net/http"
+	"shortener/internal/app/service/store"
 )
 
 func PingHandler(s store.HealthChecker) http.HandlerFunc {

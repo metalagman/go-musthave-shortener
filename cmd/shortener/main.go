@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"github.com/go-playground/validator/v10"
-	"github.com/russianlagman/go-musthave-shortener/internal/app"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/config"
 	"log"
 	"os"
 	"os/signal"
+	"shortener/internal/app"
+	"shortener/internal/app/config"
 )
 
 func main() {

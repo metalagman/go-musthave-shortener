@@ -1,8 +1,8 @@
 package basic
 
 import (
-	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
 	"net/http"
+	"shortener/internal/app/service/store"
 	"strings"
 )
 

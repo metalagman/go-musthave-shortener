@@ -2,10 +2,10 @@ package basic
 
 import (
 	"errors"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
+	"shortener/internal/app/service/store"
 	"testing"
 )
 

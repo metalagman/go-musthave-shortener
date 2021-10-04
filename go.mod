@@ -1,4 +1,4 @@
-module github.com/russianlagman/go-musthave-shortener
+module shortener
 
 go 1.16
 

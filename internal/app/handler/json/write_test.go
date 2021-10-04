@@ -2,12 +2,12 @@ package json
 
 import (
 	"context"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/handler"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"shortener/internal/app/handler"
+	"shortener/internal/app/service/store"
 	"strings"
 	"testing"
 )

@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/handler"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/service/securecookie"
 	"log"
 	"net/http"
+	"shortener/internal/app/handler"
+	"shortener/internal/app/service/securecookie"
 	"time"
 )
 

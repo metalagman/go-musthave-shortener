@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/config"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/handler/basic"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/handler/json"
-	mw "github.com/russianlagman/go-musthave-shortener/internal/app/middleware"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store/sqlstore"
 	"log"
 	"net/http"
+	"shortener/internal/app/config"
+	"shortener/internal/app/handler/basic"
+	"shortener/internal/app/handler/json"
+	mw "shortener/internal/app/middleware"
+	"shortener/internal/app/service/store/sqlstore"
 	"time"
 )
 

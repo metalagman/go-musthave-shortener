@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/jackc/pgerrcode"
 	pg "github.com/lib/pq"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
 	"log"
+	"shortener/internal/app/service/store"
 	"strconv"
 )
 
