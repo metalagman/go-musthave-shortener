@@ -41,3 +41,7 @@ func (s *Store) BatchWrite(uid string, in []store.Record) ([]store.Record, error
 
 	return in, nil
 }
+
+func (s *Store) BatchRemove(uid string, in []string) error {
+	return nil
+}

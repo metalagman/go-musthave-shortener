@@ -52,6 +52,10 @@ type BatchWriter interface {
 	BatchWrite(uid string, in []Record) ([]Record, error)
 }
 
+type BatchRemover interface {
+	BatchRemove(uid string, in []string) error
+}
+
 type RecordID string
 
 type Record struct {
