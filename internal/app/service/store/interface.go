@@ -20,10 +20,10 @@ func (e ConflictError) Error() string {
 	return "conflict"
 }
 
-// Ping allows you to perform store health check
-type Ping interface {
-	// Ping underlying storage and return error if it is not available
-	Ping() error
+// HealthChecker allows you to perform store health check
+type HealthChecker interface {
+	// HealthCheck underlying storage and return error if it is not available
+	HealthCheck() error
 }
 
 // Store of the url data

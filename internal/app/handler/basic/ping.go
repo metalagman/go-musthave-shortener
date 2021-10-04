@@ -7,9 +7,9 @@ import (
 	"net/http"
 )
 
-func PingHandler(s store.Ping) http.HandlerFunc {
+func PingHandler(s store.HealthChecker) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if err := s.Ping(); err != nil {
+		if err := s.HealthCheck(); err != nil {
 			log.Printf("ping handler: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return

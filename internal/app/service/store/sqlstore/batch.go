@@ -6,17 +6,18 @@ import (
 	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
 )
 
-// store.Store interface implementation
+// store.BatchWriter interface implementation
 var _ store.BatchWriter = (*Store)(nil)
-
-const _batchWriteSQL = `
-INSERT INTO urls (uid, original_url)
-VALUES ($1, $2)
-RETURNING id`
+var _ store.BatchRemover = (*Store)(nil)
 
 func (s *Store) BatchWrite(uid string, in []store.Record) ([]store.Record, error) {
+	const batchWriteSQL = `
+INSERT INTO urls (uid, original_url)
+VALUES ($1, $2)
+RETURNING id
+`
 	err := s.inTransaction(func(tx *sql.Tx) error {
-		stmt, err := tx.Prepare(_batchWriteSQL)
+		stmt, err := tx.Prepare(batchWriteSQL)
 		if err != nil {
 			return fmt.Errorf("sql prepare: %w", err)
 		}
