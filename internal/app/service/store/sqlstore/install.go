@@ -15,7 +15,7 @@ func (s *Store) createTables() error {
 	uid UUID,
 	original_url TEXT 
 );`
-		sqlUniqueIndex = `CREATE UNIQUE INDEX urls_unique_original_url_null
+		sqlUniqueIndex = `CREATE UNIQUE INDEX IF NOT EXISTS urls_unique_original_url_null
 ON urls(original_url)
 WHERE deleted_at IS NULL`
 	)
