@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"shortener/internal/app/service/store"
-	"strconv"
 )
 
 // store.BatchWriter interface implementation
@@ -71,13 +70,13 @@ func (s *Store) BatchRemove(uid string, ids ...string) error {
 		go func(id int, in <-chan RemoveRequest) {
 			log.Printf("worker [%d] started", id)
 			for v := range in {
-				id, err := strconv.ParseUint(v.id, s.base, 64)
+				rawID, err := s.idToInt64(v.id)
 				if err != nil {
 					log.Printf("parse uint: %v", err)
 					continue
 				}
 
-				if err := s.execQuery(softDeleteQuery, v.id, id); err != nil {
+				if err := s.execQuery(softDeleteQuery, v.id, rawID); err != nil {
 					log.Printf("exec: %v", err)
 				}
 			}
