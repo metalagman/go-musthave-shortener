@@ -15,7 +15,7 @@ var _ store.Store = (*Store)(nil)
 
 func (s *Store) ReadURL(id string) (string, error) {
 	const readSQL = `
-		SELECT original_url FROM urls WHERE id=$1
+		SELECT original_url, deleted_at FROM urls WHERE id=$1
 `
 	rawID, err := s.idToInt64(id)
 	if err != nil {
@@ -23,9 +23,14 @@ func (s *Store) ReadURL(id string) (string, error) {
 	}
 
 	var url string
-	err = s.db.QueryRow(readSQL, rawID).Scan(&url)
+	var deletedAt pg.NullTime
+	err = s.db.QueryRow(readSQL, rawID).Scan(&url, &deletedAt)
 	if err != nil {
 		return "", fmt.Errorf("read url query: %w", err)
+	}
+
+	if !deletedAt.Valid {
+		return "", store.ErrDeleted
 	}
 
 	return url, err
@@ -66,7 +71,7 @@ func (s *Store) WriteURL(url string, uid string) (string, error) {
 
 func (s *Store) ReadUserData(uid string) []store.Record {
 	const readAllSQL = `
-		SELECT id, original_url FROM urls WHERE uid=$1
+		SELECT id, original_url FROM urls WHERE uid=$1 AND deleted_at IS NULL
 `
 
 	var result []store.Record

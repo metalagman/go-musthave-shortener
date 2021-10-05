@@ -9,6 +9,7 @@ var (
 	ErrBadInput   = errors.New("bad input")
 	ErrEmptyInput = fmt.Errorf("empty url: %w", ErrBadInput)
 	ErrNotFound   = errors.New("not found")
+	ErrDeleted    = errors.New("deleted")
 	ErrConflict   = &ConflictError{}
 )
 
