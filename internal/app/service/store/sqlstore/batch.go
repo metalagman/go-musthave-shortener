@@ -76,7 +76,7 @@ func (s *Store) BatchRemove(uid string, ids ...string) error {
 					continue
 				}
 
-				if err := s.execQuery(softDeleteQuery, v.id, rawID); err != nil {
+				if err := s.execQuery(softDeleteQuery, rawID, v.uid); err != nil {
 					log.Printf("exec: %v", err)
 				}
 			}
