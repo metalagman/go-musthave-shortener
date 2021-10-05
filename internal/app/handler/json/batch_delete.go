@@ -18,7 +18,7 @@ func BatchRemoveHandler(s store.BatchRemover) http.HandlerFunc {
 
 		uid := handler.ReadContextString(r.Context(), handler.ContextKeyUID{})
 
-		if err := s.BatchRemove(uid, req); err != nil {
+		if err := s.BatchRemove(uid, req...); err != nil {
 			if errors.Is(err, store.ErrBadInput) {
 				writeError(w, err, http.StatusBadRequest)
 			} else {

@@ -53,7 +53,7 @@ type BatchWriter interface {
 }
 
 type BatchRemover interface {
-	BatchRemove(uid string, in []string) error
+	BatchRemove(uid string, ids ...string) error
 }
 
 type RecordID string

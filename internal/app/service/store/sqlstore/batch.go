@@ -3,6 +3,7 @@ package sqlstore
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"shortener/internal/app/service/store"
 )
 
@@ -21,9 +22,9 @@ RETURNING id
 		if err != nil {
 			return fmt.Errorf("sql prepare: %w", err)
 		}
-		defer func(stmt *sql.Stmt) {
+		defer func() {
 			_ = stmt.Close()
-		}(stmt)
+		}()
 		for i := range in {
 			var rawID int64
 			err := stmt.QueryRow(uid, in[i].OriginalURL).Scan(&rawID)
@@ -43,6 +44,40 @@ RETURNING id
 	return in, nil
 }
 
-func (s *Store) BatchRemove(uid string, in []string) error {
+func (s *Store) BatchRemove(uid string, ids ...string) error {
+	type RemoveRequest struct {
+		uid string
+		id  string
+	}
+
+	q := make(chan RemoveRequest)
+
+	go func() {
+		for _, v := range ids {
+			q <- RemoveRequest{
+				uid,
+				v,
+			}
+		}
+		close(q)
+	}()
+
+	const softDeleteQuery = `
+		UPDATE urls SET deleted_at = NOW()
+		WHERE id=$1 and uid=$2
+`
+	for i := 0; i < s.workerNum; i++ {
+		go func(id int, in <-chan RemoveRequest) {
+			log.Printf("worker [%d] started", id)
+			for v := range in {
+				err := s.execQuery(softDeleteQuery, v.id, v.uid)
+				if err != nil {
+					log.Printf("exec: %v", err)
+				}
+			}
+			log.Printf("worker [%d] finished", id)
+		}(i, q)
+	}
+
 	return nil
 }

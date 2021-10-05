@@ -3,12 +3,14 @@ package sqlstore
 import (
 	"database/sql"
 	"fmt"
+	"runtime"
 )
 
 type Store struct {
-	baseURL string
-	dsn     string
-	base    int
+	baseURL   string
+	dsn       string
+	base      int
+	workerNum int
 
 	db *sql.DB
 }
@@ -20,7 +22,8 @@ func New(opts ...Option) *Store {
 	)
 
 	s := &Store{
-		base: defaultBase,
+		base:      defaultBase,
+		workerNum: runtime.GOMAXPROCS(0),
 	}
 
 	for _, opt := range opts {
