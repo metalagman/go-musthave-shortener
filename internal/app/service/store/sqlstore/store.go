@@ -29,7 +29,7 @@ func (s *Store) ReadURL(id string) (string, error) {
 		return "", fmt.Errorf("read url query: %w", err)
 	}
 
-	if !deletedAt.Valid {
+	if deletedAt.Valid {
 		return "", store.ErrDeleted
 	}
 
