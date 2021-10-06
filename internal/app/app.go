@@ -2,14 +2,15 @@ package app
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"log"
 	"net/http"
 	"shortener/internal/app/config"
+	"shortener/internal/app/handler/api"
 	"shortener/internal/app/handler/basic"
-	"shortener/internal/app/handler/json"
+	"shortener/internal/app/logger"
 	mw "shortener/internal/app/middleware"
 	"shortener/internal/app/service/store/sqlstore"
 	"time"
@@ -18,16 +19,34 @@ import (
 type App struct {
 	config *config.AppConfig
 	store  *sqlstore.Store
+	log    logger.Logger
 }
 
-func New(config *config.AppConfig) *App {
-	return &App{
-		config: config,
-		store: sqlstore.New(
-			sqlstore.WithBaseURL(config.BaseURL),
-			sqlstore.WithDSN(config.DSN),
-		),
+func (a *App) LoggerComponent() string {
+	panic("App")
+}
+
+func New(config *config.AppConfig, l logger.Logger) (*App, error) {
+	db, err := sql.Open("postgres", config.DSN)
+	if err != nil {
+		return nil, fmt.Errorf("db open: %w", err)
 	}
+
+	s, err := sqlstore.New(
+		db,
+		sqlstore.WithBaseURL(config.BaseURL),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("store init: %w", err)
+	}
+
+	a := &App{
+		config: config,
+		store:  s,
+		log:    l,
+	}
+
+	return a, nil
 }
 
 func (a *App) Serve(ctx context.Context) error {
@@ -41,16 +60,16 @@ func (a *App) Serve(ctx context.Context) error {
 	}
 
 	go func() {
-		log.Printf("listening on %s", a.config.ListenAddr)
-		log.Printf("base url %s", a.config.BaseURL)
+		a.log.Debug().Msgf("Listening on %s", a.config.ListenAddr)
+		a.log.Debug().Msgf("Base URL %s", a.config.BaseURL)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %+v\n", err)
+			a.log.Fatal().Err(err).Msg("Socket listen failure")
 		}
 	}()
 
-	log.Printf("server started")
+	a.log.Debug().Msgf("Server started")
 	<-ctx.Done()
-	log.Printf("server stopped")
+	a.log.Debug().Msgf("Server stopped")
 
 	if err := a.store.Stop(); err != nil {
 		return fmt.Errorf("store shutdown: %w", err)
@@ -65,24 +84,23 @@ func (a *App) Serve(ctx context.Context) error {
 		return fmt.Errorf("server shutdown: %w", err)
 	}
 
-	log.Printf("server exited properly")
+	a.log.Debug().Msgf("Server exited properly")
 
 	return nil
 }
 
 func (a *App) router() http.Handler {
 	r := chi.NewRouter()
-
-	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(mw.Log(a.log))
 	r.Use(mw.SecureCookieAuth(a.config.SecretKey))
 	r.Use(mw.GzipResponseWriter)
 	r.Use(mw.GzipRequestReader)
 
-	r.Get("/user/urls", json.UserDataHandler(a.store))
-	r.With(mw.ContentTypeJSON).Post("/api/shorten", json.WriteHandler(a.store))
-	r.With(mw.ContentTypeJSON).Post("/api/shorten/batch", json.BatchWriteHandler(a.store))
-	r.With(mw.ContentTypeJSON).Delete("/api/user/urls", json.BatchRemoveHandler(a.store))
+	r.Get("/user/urls", api.UserDataHandler(a.store))
+	r.With(mw.ContentTypeJSON).Post("/api/shorten", api.WriteHandler(a.store))
+	r.With(mw.ContentTypeJSON).Post("/api/shorten/batch", api.BatchWriteHandler(a.store))
+	r.With(mw.ContentTypeJSON).Delete("/api/user/urls", api.BatchRemoveHandler(a.store))
 	r.Get("/{id:[0-9a-z]+}", basic.ReadHandler(a.store))
 	r.Post("/", basic.WriteHandler(a.store))
 	r.Get("/ping", basic.PingHandler(a.store))

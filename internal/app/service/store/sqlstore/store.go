@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/jackc/pgerrcode"
 	pg "github.com/lib/pq"
-	"log"
 	"shortener/internal/app/service/store"
 	"strconv"
 )
@@ -90,7 +89,7 @@ func (s *Store) ReadUserData(uid string) []store.Record {
 			originalURL string
 		)
 		if err := rows.Scan(&rawID, &originalURL); err != nil {
-			log.Printf("scan error: %v", err)
+			s.log.Error().Err(err).Msg("Scan failed")
 			break
 		}
 		id := s.idFromInt64(rawID)

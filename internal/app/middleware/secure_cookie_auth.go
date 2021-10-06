@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
-	"log"
 	"net/http"
 	"shortener/internal/app/handler"
+	"shortener/internal/app/logger"
 	"shortener/internal/app/service/securecookie"
 	"time"
 )
@@ -14,6 +14,7 @@ import (
 const cookieNameUID string = "uid"
 
 func SecureCookieAuth(secretKey string) func(next http.Handler) http.Handler {
+	log := logger.Global().Component("Middleware::SecureCookieAuth")
 	sc := securecookie.New(secretKey)
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -24,11 +25,11 @@ func SecureCookieAuth(secretKey string) func(next http.Handler) http.Handler {
 			uid, err = readUID(r, sc)
 			if err != nil {
 				if err != http.ErrNoCookie {
-					log.Printf("uid read error: %v", err)
+					log.Error().Err(err).Msg("UID read failure")
 				}
 				uid, err = regenerateUID(w, sc)
 				if err != nil {
-					log.Printf("uid regenerate error: %v", err)
+					log.Error().Err(err).Msg("UID regenerate failure")
 					next.ServeHTTP(w, r)
 					return
 				}

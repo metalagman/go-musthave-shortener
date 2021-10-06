@@ -1,4 +1,4 @@
-package json
+package api
 
 import (
 	"context"

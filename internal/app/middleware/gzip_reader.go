@@ -3,12 +3,13 @@ package middleware
 import (
 	"compress/gzip"
 	"io/ioutil"
-	"log"
 	"net/http"
+	"shortener/internal/app/logger"
 	"strings"
 )
 
 func GzipRequestReader(next http.Handler) http.Handler {
+	log := logger.Global().Component("Middleware::GzipRequestReader")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !strings.Contains(r.Header.Get("Content-Encoding"), "gzip") {
 			next.ServeHTTP(w, r)
@@ -17,7 +18,7 @@ func GzipRequestReader(next http.Handler) http.Handler {
 
 		gz, err := gzip.NewReader(r.Body)
 		if err != nil {
-			log.Printf("error gzip reading request body: %v", err)
+			log.Error().Err(err).Msg("GZIP reading request body failure")
 			return
 		}
 		defer func() {

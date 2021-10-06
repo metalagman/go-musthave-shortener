@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"github.com/go-playground/validator/v10"
-	"log"
+	"github.com/rs/zerolog/log"
 	"os"
 	"os/signal"
 	"shortener/internal/app"
 	"shortener/internal/app/config"
+	"shortener/internal/app/logger"
 )
 
 func main() {
@@ -18,19 +19,21 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		osCall := <-stop
-		log.Printf("system call: %+v", osCall)
+		log.Debug().Msgf("System call: %+v", osCall)
 		cancel()
 	}()
 
 	c := config.New()
 	if err := c.Load(); err != nil {
-		log.Fatalf("config load error: %v", err)
+		log.Fatal().Err(err).Msg("Config load failure")
 	}
+
+	l := logger.New(c.Verbose)
 
 	if err := c.Validate(); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
-			log.Fatalf(
-				"invalid value %s for config param %s, expected format: %s",
+			l.Fatal().Err(err).Msgf(
+				"Invalid value %s for config param %s, expected format: %s",
 				err.Value(),
 				err.StructField(),
 				err.ActualTag(),
@@ -38,9 +41,12 @@ func main() {
 		}
 	}
 
-	a := app.New(c)
+	a, err := app.New(c, l)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Application init failure")
+	}
 
 	if err := a.Serve(ctx); err != nil {
-		log.Printf("failed to serve: %+v\n", err)
+		log.Fatal().Err(err).Msg("Application failed to serve")
 	}
 }

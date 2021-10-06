@@ -3,7 +3,6 @@ package sqlstore
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"shortener/internal/app/service/store"
 )
 
@@ -45,44 +44,29 @@ RETURNING id
 }
 
 func (s *Store) BatchRemove(uid string, ids ...string) error {
-	type RemoveRequest struct {
-		uid string
-		id  string
-	}
-
-	q := make(chan RemoveRequest)
-
-	go func() {
-		for _, v := range ids {
-			q <- RemoveRequest{
-				uid,
-				v,
-			}
-		}
-		close(q)
-	}()
-
 	const softDeleteQuery = `
 		UPDATE urls SET deleted_at = NOW()
 		WHERE id=$1 and uid=$2
 `
-	for i := 0; i < s.workerNum; i++ {
-		go func(id int, in <-chan RemoveRequest) {
-			log.Printf("worker [%d] started", id)
-			for v := range in {
-				rawID, err := s.idToInt64(v.id)
-				if err != nil {
-					log.Printf("parse uint: %v", err)
-					continue
-				}
-
-				if err := s.execQuery(softDeleteQuery, rawID, v.uid); err != nil {
-					log.Printf("exec: %v", err)
-				}
+	asyncRemoveJob := func(uid string, id string) Job {
+		return func() {
+			rawID, err := s.idToInt64(id)
+			if err != nil {
+				s.log.Error().Err(err).Msg("Uint conversion failure")
+				return
 			}
-			log.Printf("worker [%d] finished", id)
-		}(i, q)
+
+			if err := s.execQuery(softDeleteQuery, rawID, uid); err != nil {
+				s.log.Error().Err(err).Msg("Exec failure")
+			}
+		}
 	}
+
+	go func() {
+		for _, v := range ids {
+			s.jobs <- asyncRemoveJob(uid, v)
+		}
+	}()
 
 	return nil
 }
