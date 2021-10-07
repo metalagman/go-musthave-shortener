@@ -1,9 +1,9 @@
-package json
+package api
 
 import (
-	"github.com/russianlagman/go-musthave-shortener/internal/app/handler"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
 	"net/http"
+	"shortener/internal/app/handler"
+	"shortener/internal/app/service/store"
 )
 
 type UserDataResponse []UserDataItem

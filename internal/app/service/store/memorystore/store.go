@@ -2,7 +2,7 @@ package memorystore
 
 import (
 	"fmt"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
+	"shortener/internal/app/service/store"
 	"strconv"
 )
 

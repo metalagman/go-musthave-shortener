@@ -25,3 +25,20 @@ func (s *Store) inTransaction(cb func(tx *sql.Tx) error) error {
 
 	return nil
 }
+
+func (s *Store) execQuery(query string, args ...interface{}) error {
+	stmt, err := s.db.Prepare(query)
+	if err != nil {
+		return fmt.Errorf("prepare: %w", err)
+	}
+	defer func() {
+		_ = stmt.Close()
+	}()
+
+	_, err = stmt.Exec(args...)
+	if err != nil {
+		return fmt.Errorf("exec: %w", err)
+	}
+
+	return nil
+}

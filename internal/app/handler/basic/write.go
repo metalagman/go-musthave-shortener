@@ -3,10 +3,10 @@ package basic
 import (
 	"errors"
 	"fmt"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/handler"
-	"github.com/russianlagman/go-musthave-shortener/internal/app/service/store"
 	"io/ioutil"
 	"net/http"
+	"shortener/internal/app/handler"
+	"shortener/internal/app/service/store"
 )
 
 func WriteHandler(s store.Writer) http.HandlerFunc {

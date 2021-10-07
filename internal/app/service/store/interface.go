@@ -9,6 +9,7 @@ var (
 	ErrBadInput   = errors.New("bad input")
 	ErrEmptyInput = fmt.Errorf("empty url: %w", ErrBadInput)
 	ErrNotFound   = errors.New("not found")
+	ErrDeleted    = errors.New("deleted")
 	ErrConflict   = &ConflictError{}
 )
 
@@ -20,10 +21,10 @@ func (e ConflictError) Error() string {
 	return "conflict"
 }
 
-// Ping allows you to perform store health check
-type Ping interface {
-	// Ping underlying storage and return error if it is not available
-	Ping() error
+// HealthChecker allows you to perform store health check
+type HealthChecker interface {
+	// HealthCheck underlying storage and return error if it is not available
+	HealthCheck() error
 }
 
 // Store of the url data
@@ -50,6 +51,10 @@ type Writer interface {
 
 type BatchWriter interface {
 	BatchWrite(uid string, in []Record) ([]Record, error)
+}
+
+type BatchRemover interface {
+	BatchRemove(uid string, ids ...string) error
 }
 
 type RecordID string
