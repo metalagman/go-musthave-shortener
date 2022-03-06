@@ -98,7 +98,7 @@ func (a *App) router() http.Handler {
 	r.Use(mw.GzipResponseWriter)
 	r.Use(mw.GzipRequestReader)
 
-	r.Get("/user/urls", api.UserDataHandler(a.store))
+	r.With(mw.ContentTypeJSON).Get("/user/urls", api.UserDataHandler(a.store))
 	r.With(mw.ContentTypeJSON).Post("/api/shorten", api.WriteHandler(a.store))
 	r.With(mw.ContentTypeJSON).Post("/api/shorten/batch", api.BatchWriteHandler(a.store))
 	r.With(mw.ContentTypeJSON).Delete("/api/user/urls", api.BatchRemoveHandler(a.store))
