@@ -19,6 +19,10 @@ cover:
 	go test -cover -coverprofile=coverage.out -race -short ./... | grep -v 'no test files'
 	go tool cover -func=coverage.out
 
+generate:
+	@echo "Generating mocks"
+	go generate ./...
+
 .PHONY: build
 build: build-shortener
 

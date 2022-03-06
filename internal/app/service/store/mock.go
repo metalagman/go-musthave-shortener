@@ -22,3 +22,8 @@ func (m *Mock) ReadUserData(uid string) []Record {
 	args := m.Called(uid)
 	return args.Get(0).([]Record)
 }
+
+func (m *Mock) HealthCheck() error {
+	args := m.Called()
+	return args.Error(0)
+}

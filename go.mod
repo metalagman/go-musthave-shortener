@@ -6,6 +6,7 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0 // indirect
 	github.com/go-chi/chi/v5 v5.0.3
 	github.com/go-playground/validator/v10 v10.9.0
+	github.com/golang/mock v1.6.0 // indirect
 	github.com/google/uuid v1.3.0
 	github.com/jackc/pgerrcode v0.0.0-20201024163028-a0d42d470451
 	github.com/joeshaw/envdecode v0.0.0-20200121155833-099f1fc765bd

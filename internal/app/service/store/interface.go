@@ -1,3 +1,4 @@
+//go:generate mockgen -source=./interface.go -destination=./mock/store.go -package=storemock
 package store
 
 import (
