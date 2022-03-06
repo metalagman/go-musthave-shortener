@@ -7,6 +7,9 @@ test:
 	@go clean -testcache
 	go test -cover -race -short ./... | { grep -v 'no test files'; true; }
 
-build:
-	@echo "Building the app to the .build dir"
-	go build -o .build/shortener ./cmd/shortener/*.go
+.PHONY: build
+build: build-shortener
+
+build-shortener:
+	@echo "Building the shortener app to the bin dir"
+	CGO_ENABLED=1 go build -o ./bin/shortener ./cmd/shortener/*.go

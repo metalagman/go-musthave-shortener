@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"net/http"
+	_ "net/http/pprof"
 	"shortener/internal/app/config"
 	"shortener/internal/app/handler/api"
 	"shortener/internal/app/handler/basic"
