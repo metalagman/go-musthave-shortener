@@ -21,8 +21,8 @@ services:
     depends_on:
       - shortener_deps
     ports:
-        - "8080:8080"
-    command: ["/app/shortener", "-v"]
+        - "80:80"
+    command: ["/app/shortener", "-v", "-a", "localhost:80"]
 
   db:
     image: postgres:14.1-alpine

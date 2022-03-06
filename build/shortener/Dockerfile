@@ -13,5 +13,5 @@ WORKDIR /app
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /go/src/app/bin/* /app/
 RUN chmod +x /app/*
-EXPOSE 8080/tcp
+EXPOSE 80/tcp
 CMD /app/shortener -v

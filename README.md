@@ -21,3 +21,12 @@ git fetch template && git checkout template/main .github
 ```
 
 затем добавьте полученые изменения в свой репозиторий.
+
+# Profiling
+
+```shell
+wget -O cpu.pprof http://localhost:8081/debug/pprof/profile?seconds=30
+go tool pprof -http=":9090" cpu.pprof
+wget -O mem.pprof http://localhost:8081/debug/pprof/heap?seconds=30
+go tool pprof -http=":9090" mem.pprof
+```
