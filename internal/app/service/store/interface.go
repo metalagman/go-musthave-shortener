@@ -1,4 +1,7 @@
 //go:generate mockgen -source=./interface.go -destination=./mock/store.go -package=storemock
+/*
+Package store provides interfaces for storing data.
+*/
 package store
 
 import (
@@ -35,18 +38,21 @@ type Store interface {
 	UserDataReader
 }
 
+// Reader allows you to read short urls.
 type Reader interface {
-	// ReadURL from storage using provided id
+	// ReadURL from storage using provided id.
 	ReadURL(id string) (string, error)
 }
 
+// UserDataReader allows you to read user short urls.
 type UserDataReader interface {
 	// ReadUserData from db
 	ReadUserData(uid string) []Record
 }
 
+// Writer allows you to write urls into persistent storage.
 type Writer interface {
-	// WriteURL to storage, returns short Record
+	// WriteURL to storage, returns short Record.
 	WriteURL(url string, uid string) (string, error)
 }
 

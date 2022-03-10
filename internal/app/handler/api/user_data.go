@@ -13,6 +13,9 @@ type UserDataItem struct {
 	OriginalURL string `json:"original_url"`
 }
 
+// UserDataHandler returns multiple urls owned by user.
+//
+//	curl -X GET -H "Content-Type: application/json" --cookie "uid=XXX" http://localhost:8080/api/user/urls
 func UserDataHandler(s store.UserDataReader) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")

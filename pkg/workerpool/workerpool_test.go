@@ -37,7 +37,6 @@ func Example_panicHandling() {
 
 	job := func(ctx context.Context) error {
 		panic("oops")
-		return nil
 	}
 	pool.Run(job)
 	// that will work fine (and get to logger)
@@ -120,7 +119,7 @@ func ExampleAddContext() {
 	pool := New()
 	pool.Start(1)
 
-	ctxKey := "key"
+	ctxKey := struct{}{}
 
 	job := func(ctx context.Context) error {
 		if v, ok := ctx.Value(ctxKey).(string); ok {

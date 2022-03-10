@@ -15,6 +15,10 @@ type WriteHandlerResponse struct {
 	Result string `json:"result"`
 }
 
+// WriteHandler stores original url and returns the short version.
+//
+//	curl -X POST -H "Content-Type: application/json" -d '{"url":"https://example.org"}' http://localhost:8080/api/shorten
+//	{"result":"http://localhost:8080/xxx"}
 func WriteHandler(s store.Writer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		reqObj := &WriteHandlerRequest{}
