@@ -1,0 +1,35 @@
+version: '3.1'
+
+services:
+  shortener_deps:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - db
+    environment:
+      SLEEP_LENGTH: 1
+      TIMEOUT_LENGTH: 120
+    command: db:5432
+
+  shortener:
+    restart: unless-stopped
+    env_file:
+      - ../configs/env/shortener.env
+    build:
+      context: ../.
+      dockerfile: build/shortener/Dockerfile
+    image: shortener:latest
+    depends_on:
+      - shortener_deps
+    ports:
+        - "80:80"
+    command: ["/app/shortener", "-v", "-a", "localhost:80"]
+
+  db:
+    image: postgres:14.1-alpine
+    restart: always
+    env_file:
+      - ../configs/env/db.env
+    ports:
+      - '5432:5432'
+    volumes:
+      - ../.tmp/postgres_data:/var/lib/postgresql/data

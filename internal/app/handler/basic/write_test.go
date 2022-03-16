@@ -3,12 +3,14 @@ package basic
 import (
 	"context"
 	"errors"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"shortener/internal/app/handler"
 	"shortener/internal/app/service/store"
+	storemock "shortener/internal/app/service/store/mock"
 	"strings"
 	"testing"
 )
@@ -23,11 +25,16 @@ func TestWriteHandler(t *testing.T) {
 		body string
 	}
 
-	s := &store.Mock{}
-	s.On("WriteURL", "https://example.org", "").Return("http://localhost/bar", nil)
-	s.On("WriteURL", "https://example.org", "test").Return("http://localhost/bar", nil)
-	s.On("WriteURL", "", "test").Return("", errors.New("bad url"))
-	s.On("WriteURL", "bad", "test").Return("", errors.New("bad url"))
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	s := storemock.NewMockStore(ctrl)
+	s.EXPECT().WriteURL("https://example.org", "test").Return("http://localhost/bar", nil)
+	s.EXPECT().WriteURL("", "test").Return("", errors.New("bad url"))
+	s.EXPECT().WriteURL("bad", "test").Return("", errors.New("bad url"))
+	s.EXPECT().WriteURL("https://example.org/conflict", "test").Return("", &store.ConflictError{
+		ExistingURL: "https://example.org/non-conflict",
+	})
 
 	tests := []struct {
 		name string
@@ -65,6 +72,17 @@ func TestWriteHandler(t *testing.T) {
 			want{
 				code: http.StatusBadRequest,
 				body: "bad url\n",
+			},
+		},
+		{
+			"conflict",
+			args{
+				store: s,
+				body:  "https://example.org/conflict",
+			},
+			want{
+				code: http.StatusConflict,
+				body: "https://example.org/non-conflict",
 			},
 		},
 	}

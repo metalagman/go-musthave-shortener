@@ -7,6 +7,25 @@ test:
 	@go clean -testcache
 	go test -cover -race -short ./... | { grep -v 'no test files'; true; }
 
-build:
-	@echo "Building the app to the .build dir"
-	go build -o .build/shortener ./cmd/shortener/*.go
+cover-html:
+	@echo "Running test coverage"
+	@go clean -testcache
+	go test -cover -coverprofile=coverage.out -race -short ./... | grep -v 'no test files'
+	go tool cover -html=coverage.out
+
+cover:
+	@echo "Running test coverage"
+	@go clean -testcache
+	go test -cover -coverprofile=coverage.out -race -short ./... | grep -v 'no test files'
+	go tool cover -func=coverage.out
+
+generate:
+	@echo "Generating mocks"
+	go generate ./...
+
+.PHONY: build
+build: build-shortener
+
+build-shortener:
+	@echo "Building the shortener app to the bin dir"
+	CGO_ENABLED=1 go build -o ./bin/shortener ./cmd/shortener/*.go

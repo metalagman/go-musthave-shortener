@@ -7,6 +7,9 @@ import (
 	"shortener/internal/app/service/store"
 )
 
+// PingHandler allows you to check system health.
+//
+//	curl -v http://localhost:8080/ping
 func PingHandler(s store.HealthChecker) http.HandlerFunc {
 	log := logger.Global().Component("Handler::Ping")
 	return func(w http.ResponseWriter, r *http.Request) {

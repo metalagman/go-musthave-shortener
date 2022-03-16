@@ -2,12 +2,14 @@ package api
 
 import (
 	"context"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"shortener/internal/app/handler"
 	"shortener/internal/app/service/store"
+	storemock "shortener/internal/app/service/store/mock"
 	"strings"
 	"testing"
 )
@@ -23,10 +25,13 @@ func TestWriteHandler(t *testing.T) {
 		body string
 	}
 
-	s := &store.Mock{}
-	s.On("WriteURL", "https://example.org", "test").Return("http://localhost/bar", nil)
-	s.On("WriteURL", "", "test").Return("", store.ErrBadInput)
-	s.On("WriteURL", "bad", "test").Return("", store.ErrBadInput)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	s := storemock.NewMockStore(ctrl)
+	s.EXPECT().WriteURL("https://example.org", "test").Return("http://localhost/bar", nil)
+	//s.EXPECT().WriteURL("", "test").Return("", store.ErrBadInput)
+	s.EXPECT().WriteURL("bad", "test").Return("", store.ErrBadInput)
 
 	tests := []struct {
 		name string

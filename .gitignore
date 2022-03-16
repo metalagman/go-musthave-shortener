@@ -27,3 +27,5 @@ vendor/
 urls.gob
 
 .build
+.tmp
+*.pprof

@@ -9,6 +9,10 @@ import (
 	"shortener/internal/app/service/store"
 )
 
+// WriteHandler stores original url and returns the short version
+//
+//	curl -X POST -d "https://example.org/" http://localhost:8080/
+//	http://localhost:8080/xxx
 func WriteHandler(s store.Writer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := ioutil.ReadAll(r.Body)
