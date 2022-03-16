@@ -49,6 +49,7 @@ import (
 	"strings"
 )
 
+// All available analyzers collection
 func All() []*analysis.Analyzer {
 	var list []*analysis.Analyzer
 	list = append(list, DefaultAnalysers()...)
@@ -60,6 +61,7 @@ func All() []*analysis.Analyzer {
 	return list
 }
 
+// CustomAnalysers collection
 func CustomAnalysers() []*analysis.Analyzer {
 	return []*analysis.Analyzer{
 		errname.New(),
@@ -67,6 +69,7 @@ func CustomAnalysers() []*analysis.Analyzer {
 	}
 }
 
+// DefaultAnalysers collection
 func DefaultAnalysers() []*analysis.Analyzer {
 	return []*analysis.Analyzer{
 		// The traditional vet suite:
@@ -116,18 +119,22 @@ func DefaultAnalysers() []*analysis.Analyzer {
 	}
 }
 
+// StaticCheckSA is a collection of staticcheck.io SA analyzers
 func StaticCheckSA() []*analysis.Analyzer {
 	return StaticCheckPrefix("SA")
 }
 
+// StaticCheckST is a collection of staticcheck.io ST analyzers
 func StaticCheckST() []*analysis.Analyzer {
 	return StaticCheckPrefix("ST")
 }
 
+// StaticCheckQF is a collection of staticcheck.io QF analyzers
 func StaticCheckQF() []*analysis.Analyzer {
 	return StaticCheckPrefix("QF")
 }
 
+// StaticCheckPrefix is a collection of staticcheck.io ST analyzers
 func StaticCheckPrefix(p string) []*analysis.Analyzer {
 	var res []*analysis.Analyzer
 	for _, v := range staticcheck.Analyzers {

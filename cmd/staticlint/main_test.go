@@ -1,12 +1,5 @@
 package main
 
-import (
-	"golang.org/x/tools/go/analysis/multichecker"
-	"shortener/pkg/linter"
-)
+func Example() {
 
-func main() {
-	multichecker.Main(
-		linter.All()...,
-	)
 }
