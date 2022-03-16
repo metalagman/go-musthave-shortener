@@ -1,6 +1,8 @@
 package linter
 
 import (
+	errname "github.com/Antonboom/errname/pkg/analyzer"
+	errcheck "github.com/kisielk/errcheck/errcheck"
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/asmdecl"
 	"golang.org/x/tools/go/analysis/passes/assign"
@@ -43,7 +45,26 @@ import (
 	"golang.org/x/tools/go/analysis/passes/unusedresult"
 	"golang.org/x/tools/go/analysis/passes/unusedwrite"
 	"golang.org/x/tools/go/analysis/passes/usesgenerics"
+	"honnef.co/go/tools/staticcheck"
+	"strings"
 )
+
+func All() []*analysis.Analyzer {
+	var list []*analysis.Analyzer
+	list = append(list, DefaultAnalysers()...)
+	list = append(list, StaticCheckSA()...)
+	list = append(list, StaticCheckST()...)
+	list = append(list, StaticCheckQF()...)
+	list = append(list, CustomAnalysers()...)
+	return list
+}
+
+func CustomAnalysers() []*analysis.Analyzer {
+	return []*analysis.Analyzer{
+		errname.New(),
+		errcheck.Analyzer,
+	}
+}
 
 func DefaultAnalysers() []*analysis.Analyzer {
 	return []*analysis.Analyzer{
@@ -92,4 +113,26 @@ func DefaultAnalysers() []*analysis.Analyzer {
 		testinggoroutine.Analyzer,
 		unusedwrite.Analyzer,
 	}
+}
+
+func StaticCheckSA() []*analysis.Analyzer {
+	return StaticCheckPrefix("SA")
+}
+
+func StaticCheckST() []*analysis.Analyzer {
+	return StaticCheckPrefix("ST")
+}
+
+func StaticCheckQF() []*analysis.Analyzer {
+	return StaticCheckPrefix("QF")
+}
+
+func StaticCheckPrefix(p string) []*analysis.Analyzer {
+	var res []*analysis.Analyzer
+	for _, v := range staticcheck.Analyzers {
+		if strings.HasPrefix(v.Analyzer.Name, p) {
+			res = append(res, v.Analyzer)
+		}
+	}
+	return res
 }

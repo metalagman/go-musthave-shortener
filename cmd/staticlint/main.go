@@ -7,6 +7,6 @@ import (
 
 func main() {
 	multichecker.Main(
-		linter.DefaultAnalysers()...,
+		linter.All()...,
 	)
 }
