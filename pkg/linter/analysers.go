@@ -17,7 +17,6 @@ import (
 	"golang.org/x/tools/go/analysis/passes/ctrlflow"
 	"golang.org/x/tools/go/analysis/passes/deepequalerrors"
 	"golang.org/x/tools/go/analysis/passes/errorsas"
-	"golang.org/x/tools/go/analysis/passes/fieldalignment"
 	"golang.org/x/tools/go/analysis/passes/findcall"
 	"golang.org/x/tools/go/analysis/passes/framepointer"
 	"golang.org/x/tools/go/analysis/passes/httpresponse"
@@ -46,6 +45,7 @@ import (
 	"golang.org/x/tools/go/analysis/passes/unusedwrite"
 	"golang.org/x/tools/go/analysis/passes/usesgenerics"
 	"honnef.co/go/tools/staticcheck"
+	"shortener/pkg/nomainexit"
 	"strings"
 )
 
@@ -56,6 +56,7 @@ func All() []*analysis.Analyzer {
 	list = append(list, StaticCheckST()...)
 	list = append(list, StaticCheckQF()...)
 	list = append(list, CustomAnalysers()...)
+	list = append(list, nomainexit.Analyzer)
 	return list
 }
 
@@ -106,7 +107,7 @@ func DefaultAnalysers() []*analysis.Analyzer {
 		// Non-vet analyzers:
 		atomicalign.Analyzer,
 		deepequalerrors.Analyzer,
-		fieldalignment.Analyzer,
+		//fieldalignment.Analyzer,
 		nilness.Analyzer,
 		shadow.Analyzer,
 		sortslice.Analyzer,
