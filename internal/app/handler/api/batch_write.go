@@ -17,6 +17,10 @@ type BatchWriteResponseItem struct {
 	ShortURL      string `json:"short_url"`
 }
 
+// BatchWriteHandler stores multiple original urls and returns the short versions.
+//
+//	curl -X POST -H "Content-Type: application/json" -d '[{"correlation_id":"abc","original_url":"https://example.org"}]' http://localhost:8080/api/shorten/batch
+//	[{"correlation_id":"abc","short_url":"http://localhost:8080/xxy"}]
 func BatchWriteHandler(s store.BatchWriter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		reqObj := make([]BatchWriteRequestItem, 0)

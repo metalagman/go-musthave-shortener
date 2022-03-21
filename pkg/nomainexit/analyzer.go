@@ -1,3 +1,7 @@
+/*
+Package nomainexit allows you to check if you're making direct call to os.Exit
+within the main function of main package of your application.
+*/
 package nomainexit
 
 import (
@@ -5,12 +9,14 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
+// Analyzer instance
 var Analyzer = &analysis.Analyzer{
 	Name: "nomainexit",
 	Doc:  "check for using os.Exit in function main of package main",
 	Run:  run,
 }
 
+// run analyzer code
 func run(pass *analysis.Pass) (interface{}, error) {
 	expr := func(x *ast.ExprStmt) {
 		if call, ok := x.X.(*ast.CallExpr); ok {
@@ -37,13 +43,13 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	return nil, nil
 }
 
-// helpers
-// =======
+// isPkgDot checks provided selector matches the package name and function name
 func isPkgDot(expr ast.Expr, pkg, name string) bool {
 	sel, ok := expr.(*ast.SelectorExpr)
 	return ok && isIdent(sel.X, pkg) && isIdent(sel.Sel, name)
 }
 
+// isIdent checks if provided expression is equal to provided ident
 func isIdent(expr ast.Expr, ident string) bool {
 	id, ok := expr.(*ast.Ident)
 	return ok && id.Name == ident

@@ -34,11 +34,17 @@ func writeError(w http.ResponseWriter, err error, statusCode int) {
 
 // writeResponse formatted in json
 func writeResponse(w http.ResponseWriter, v interface{}, statusCode int) {
-	resBody, err := json.Marshal(v)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	var resBody []byte
+	var err error
+
+	if v != nil {
+		resBody, err = json.Marshal(v)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
+
 	w.WriteHeader(statusCode)
 	_, _ = w.Write(resBody)
 }

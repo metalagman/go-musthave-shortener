@@ -2,10 +2,12 @@ package basic
 
 import (
 	"errors"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"shortener/internal/app/service/store"
+	storemock "shortener/internal/app/service/store/mock"
 	"testing"
 )
 
@@ -19,10 +21,14 @@ func TestReadHandler(t *testing.T) {
 		redirectURL string
 	}
 
-	s := &store.Mock{}
-	s.On("ReadURL", "test1").Return("https://example.org", nil)
-	s.On("ReadURL", "").Return("", errors.New("empty id"))
-	s.On("ReadURL", "missing").Return("", errors.New("missing id"))
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	s := storemock.NewMockStore(ctrl)
+	s.EXPECT().ReadURL("test1").Return("https://example.org", nil)
+	s.EXPECT().ReadURL("").Return("", errors.New("empty id"))
+	s.EXPECT().ReadURL("missing").Return("", errors.New("missing id"))
+	s.EXPECT().ReadURL("deleted").Return("", store.ErrDeleted)
 
 	tests := []struct {
 		name string
@@ -54,10 +60,20 @@ func TestReadHandler(t *testing.T) {
 			"read missing",
 			args{
 				store: s,
-				path:  "/",
+				path:  "/missing",
 			},
 			want{
 				code: http.StatusBadRequest,
+			},
+		},
+		{
+			"read deleted",
+			args{
+				store: s,
+				path:  "/deleted",
+			},
+			want{
+				code: http.StatusGone,
 			},
 		},
 	}
