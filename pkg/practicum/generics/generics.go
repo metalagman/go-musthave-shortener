@@ -2,7 +2,12 @@ package generics
 
 import "golang.org/x/exp/constraints"
 
+type Maps[K comparable, V any] map[K]V
+
 type Slice[T any] []T
+type Slaps[K comparable, V any] interface {
+	Maps[K, V] | Slice[V]
+}
 
 func (s *Slice[T]) Map(f func(T) T) *Slice[T] {
 	for k, v := range *s {
