@@ -15,7 +15,7 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/justinas/alice v1.2.0
 	github.com/kisielk/errcheck v1.6.1-0.20211222185619-b275da01e669
-	github.com/lib/pq v1.10.3
+	github.com/lib/pq v1.10.4
 	github.com/rs/xid v1.3.0
 	github.com/rs/zerolog v1.25.0
 	github.com/spf13/pflag v1.0.5
@@ -38,8 +38,10 @@ require (
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
+	github.com/pressly/goose/v3 v3.5.3 // indirect
+	golang.org/x/crypto v0.0.0-20220210151621-f4118a5b28e2 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
 	golang.org/x/sys v0.0.0-20220315194320-039c03cc5b86 // indirect
 	golang.org/x/text v0.3.7 // indirect

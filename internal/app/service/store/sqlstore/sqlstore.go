@@ -30,10 +30,6 @@ func New(db *sql.DB, opts ...Option) (*Store, error) {
 		log:  logger.Global().Component("Store"),
 	}
 
-	if err := s.createTables(); err != nil {
-		return nil, fmt.Errorf("create tables: %w", err)
-	}
-
 	for _, opt := range opts {
 		opt(s)
 	}
@@ -51,9 +47,6 @@ func WithBaseURL(url string) Option {
 
 // Start db connection
 func (s *Store) Start() error {
-	if err := s.createTables(); err != nil {
-		return fmt.Errorf("create tables: %w", err)
-	}
 
 	s.wp.Start(runtime.GOMAXPROCS(0) * 2)
 

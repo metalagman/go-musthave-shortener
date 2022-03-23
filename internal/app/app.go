@@ -14,6 +14,7 @@ import (
 	"shortener/internal/app/logger"
 	mw "shortener/internal/app/middleware"
 	"shortener/internal/app/service/store/sqlstore"
+	"shortener/internal/migrate"
 	"time"
 )
 
@@ -31,6 +32,10 @@ func New(config *config.AppConfig, l logger.Logger) (*App, error) {
 	db, err := sql.Open("postgres", config.DSN)
 	if err != nil {
 		return nil, fmt.Errorf("db open: %w", err)
+	}
+
+	if err = migrate.Up(db); err != nil {
+		return nil, fmt.Errorf("migrate up: %w", err)
 	}
 
 	s, err := sqlstore.New(
