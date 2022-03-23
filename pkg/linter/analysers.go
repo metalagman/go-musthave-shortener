@@ -44,9 +44,11 @@ import (
 	"golang.org/x/tools/go/analysis/passes/unusedresult"
 	"golang.org/x/tools/go/analysis/passes/unusedwrite"
 	"golang.org/x/tools/go/analysis/passes/usesgenerics"
+	"honnef.co/go/tools/quickfix"
+	"honnef.co/go/tools/simple"
 	"honnef.co/go/tools/staticcheck"
+	"honnef.co/go/tools/stylecheck"
 	"shortener/pkg/nomainexit"
-	"strings"
 )
 
 // All available analyzers collection
@@ -54,7 +56,8 @@ func All() []*analysis.Analyzer {
 	var list []*analysis.Analyzer
 	list = append(list, DefaultAnalysers()...)
 	list = append(list, StaticCheckSA()...)
-	list = append(list, StaticCheckST()...)
+	//list = append(list, StaticCheckST()...)
+	list = append(list, StaticCheckS()...)
 	list = append(list, StaticCheckQF()...)
 	list = append(list, CustomAnalysers()...)
 	list = append(list, nomainexit.Analyzer)
@@ -119,28 +122,38 @@ func DefaultAnalysers() []*analysis.Analyzer {
 	}
 }
 
+// StaticCheckS is a collection of staticcheck.io S analyzers
+func StaticCheckS() []*analysis.Analyzer {
+	var res []*analysis.Analyzer
+	for _, v := range simple.Analyzers {
+		res = append(res, v.Analyzer)
+	}
+	return res
+}
+
 // StaticCheckSA is a collection of staticcheck.io SA analyzers
 func StaticCheckSA() []*analysis.Analyzer {
-	return StaticCheckPrefix("SA")
+	var res []*analysis.Analyzer
+	for _, v := range staticcheck.Analyzers {
+		res = append(res, v.Analyzer)
+	}
+	return res
 }
 
 // StaticCheckST is a collection of staticcheck.io ST analyzers
 func StaticCheckST() []*analysis.Analyzer {
-	return StaticCheckPrefix("ST")
+	var res []*analysis.Analyzer
+	for _, v := range stylecheck.Analyzers {
+		res = append(res, v.Analyzer)
+	}
+	return res
 }
 
 // StaticCheckQF is a collection of staticcheck.io QF analyzers
 func StaticCheckQF() []*analysis.Analyzer {
-	return StaticCheckPrefix("QF")
-}
-
-// StaticCheckPrefix is a collection of staticcheck.io ST analyzers
-func StaticCheckPrefix(p string) []*analysis.Analyzer {
 	var res []*analysis.Analyzer
-	for _, v := range staticcheck.Analyzers {
-		if strings.HasPrefix(v.Analyzer.Name, p) {
-			res = append(res, v.Analyzer)
-		}
+	for _, v := range quickfix.Analyzers {
+		res = append(res, v.Analyzer)
 	}
 	return res
 }

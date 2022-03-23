@@ -11,6 +11,12 @@ import (
 	"shortener/internal/app/logger"
 )
 
+var (
+	buildVersion string
+	buildDate    string
+	buildCommit  string
+)
+
 func main() {
 	// Setting up signal capturing
 	stop := make(chan os.Signal, 1)
