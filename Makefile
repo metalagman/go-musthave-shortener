@@ -26,6 +26,14 @@ generate:
 .PHONY: build
 build: build-shortener
 
+GIT_COMMIT := $(shell git rev-list -1 HEAD)
+BUILD_DATE := $(shell date +%FT%T%z)
+VERSION := $(shell git describe --tags --abbrev=0 --always | sed -eo "s/\-/\./g")
+
 build-shortener:
 	@echo "Building the shortener app to the bin dir"
-	CGO_ENABLED=1 go build -o ./bin/shortener ./cmd/shortener/*.go
+	CGO_ENABLED=1 go build -o ./bin/shortener \
+		-ldflags="-X 'shortener/pkg/version.Revision=$(GIT_COMMIT)'\
+		 -X 'shortener/pkg/version.Version=$(VERSION)'\
+		  -X 'shortener/pkg/version.BuildDate=$(BUILD_DATE)'" \
+		./cmd/shortener/*.go
