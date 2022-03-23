@@ -8,7 +8,7 @@ import (
 )
 
 func Example() {
-	db := getDb()
+	db := GetDb()
 	defer db.Close()
 
 	s, err := New(db, WithBaseURL("http://localhost:8080"))
@@ -37,7 +37,7 @@ func Example() {
 	// Output: http://localhost:8080/1
 }
 
-func getDb() *sql.DB {
+func GetDb() *sql.DB {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		log.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
