@@ -28,7 +28,7 @@ build: build-shortener
 
 GIT_COMMIT := $(shell git rev-list -1 HEAD)
 BUILD_DATE := $(shell date +%FT%T%z)
-VERSION := $(shell git describe --tags --abbrev=0 --always | sed -eo "s/\-/\./g")
+VERSION := $(shell git describe --tags --abbrev=0 --always)
 
 build-shortener:
 	@echo "Building the shortener app to the bin dir"
