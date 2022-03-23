@@ -1,9 +1,11 @@
 package sqlstore
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"shortener/internal/app/service/store"
+	"shortener/pkg/workerpool"
 )
 
 // store.BatchWriter interface implementation
@@ -48,23 +50,24 @@ func (s *Store) BatchRemove(uid string, ids ...string) error {
 		UPDATE urls SET deleted_at = NOW()
 		WHERE id=$1 and uid=$2
 `
-	asyncRemoveJob := func(uid string, id string) Job {
-		return func() {
+	asyncRemoveJob := func(uid string, id string) workerpool.Job {
+		return func(ctx context.Context) error {
 			rawID, err := s.idToInt64(id)
 			if err != nil {
-				s.log.Error().Err(err).Msg("Uint conversion failure")
-				return
+				return err
 			}
 
 			if err := s.execQuery(softDeleteQuery, rawID, uid); err != nil {
-				s.log.Error().Err(err).Msg("Exec failure")
+				return err
 			}
+
+			return nil
 		}
 	}
 
 	go func() {
 		for _, v := range ids {
-			s.jobs <- asyncRemoveJob(uid, v)
+			s.wp.Run(asyncRemoveJob(uid, v))
 		}
 	}()
 
