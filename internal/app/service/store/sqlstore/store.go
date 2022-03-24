@@ -52,9 +52,9 @@ func (s *Store) WriteURL(url string, uid string) (string, error) {
 		var pgErr *pg.Error
 		if errors.As(err, &pgErr) {
 			if pgerrcode.IsIntegrityConstraintViolation(string(pgErr.Code)) {
-				err := s.db.QueryRow(`SELECT id FROM urls WHERE original_url = $1`, url).Scan(&rawID)
-				if err != nil {
-					return "", fmt.Errorf("query conflicting id: %w", err)
+				qErr := s.db.QueryRow(`SELECT id FROM urls WHERE original_url = $1`, url).Scan(&rawID)
+				if qErr != nil {
+					return "", fmt.Errorf("query conflicting id: %w", qErr)
 				}
 				return "", &store.ConflictError{
 					ExistingURL: s.shortURL(s.idFromInt64(rawID)),

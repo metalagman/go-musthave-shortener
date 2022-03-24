@@ -7,6 +7,7 @@ on:
       - master
       - main
       - increment*
+      - sprint*
 jobs:
 
   statictest:

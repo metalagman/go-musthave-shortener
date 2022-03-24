@@ -135,7 +135,6 @@ func (s *Store) Stop() error {
 
 	// stop and reset ticker
 	s.dbFlushTicker.Stop()
-	s.dbFlushTicker = nil
 
 	// write db to file
 	_ = s.writeDB(false)

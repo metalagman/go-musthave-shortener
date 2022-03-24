@@ -1,3 +1,6 @@
+/*
+Package config provides application config structure and tools.
+*/
 package config
 
 import (

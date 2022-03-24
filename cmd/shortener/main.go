@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog/log"
 	"os"
@@ -9,9 +10,12 @@ import (
 	"shortener/internal/app"
 	"shortener/internal/app/config"
 	"shortener/internal/app/logger"
+	"shortener/pkg/version"
 )
 
 func main() {
+	fmt.Println(version.Print())
+
 	// Setting up signal capturing
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
