@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"golang.org/x/crypto/acme/autocert"
 	"net/http"
 	"net/http/pprof"
 	"shortener/internal/app/config"
@@ -68,8 +69,16 @@ func (a *App) Serve(ctx context.Context) error {
 	go func() {
 		a.log.Debug().Msgf("Listening on %s", a.config.ListenAddr)
 		a.log.Debug().Msgf("Base URL %s", a.config.BaseURL)
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			a.log.Fatal().Err(err).Msg("Socket listen failure")
+
+		if a.config.EnableHTTPS {
+			l := autocert.NewListener(a.config.ListenAddr)
+			if err := srv.Serve(l); err != nil && err != http.ErrServerClosed {
+				a.log.Fatal().Err(err).Msg("Socket listen failure")
+			}
+		} else {
+			if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+				a.log.Fatal().Err(err).Msg("Socket listen failure")
+			}
 		}
 	}()
 

@@ -23,6 +23,7 @@ type AppConfig struct {
 	DSN                  string `env:"DATABASE_DSN"`
 	StorageFlushInterval time.Duration
 	Verbose              bool `env:"APP_VERBOSE,default=0"`
+	EnableHTTPS          bool `env:"ENABLE_HTTPS,default=0"`
 }
 
 // New constructor
@@ -47,6 +48,7 @@ func (c *AppConfig) Load() error {
 	pflag.StringVarP(&c.StorageFilePath, "storage-file-path", "f", c.StorageFilePath, "Storage file path")
 	pflag.StringVarP(&c.DSN, "dsn", "d", c.DSN, "Database connection DSN")
 	pflag.BoolVarP(&c.Verbose, "verbose", "v", c.Verbose, "Verbose output")
+	pflag.BoolVarP(&c.EnableHTTPS, "secure", "s", c.EnableHTTPS, "Enable HTTPS")
 	pflag.Parse()
 
 	return nil
