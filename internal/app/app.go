@@ -71,8 +71,12 @@ func (a *App) Serve(ctx context.Context) error {
 		a.log.Debug().Msgf("Base URL %s", a.config.BaseURL)
 
 		if a.config.EnableHTTPS {
-			l := autocert.NewListener(a.config.ListenAddr)
-			if err := srv.Serve(l); err != nil && err != http.ErrServerClosed {
+			manager := &autocert.Manager{
+				Prompt:     autocert.AcceptTOS,
+				HostPolicy: autocert.HostWhitelist(a.config.ListenAddr),
+			}
+			srv.TLSConfig = manager.TLSConfig()
+			if err := srv.ListenAndServeTLS("", ""); err != nil && err != http.ErrServerClosed {
 				a.log.Fatal().Err(err).Msg("Socket listen failure")
 			}
 		} else {
