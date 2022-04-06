@@ -4,6 +4,7 @@ Package config provides application config structure and tools.
 package config
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/go-playground/validator/v10"
@@ -12,18 +13,29 @@ import (
 	"github.com/spf13/pflag"
 	"io/fs"
 	"net/url"
+	"os"
 	"time"
 )
 
+/**
+{
+    "server_address": "localhost:80", // аналог переменной окружения SERVER_ADDRESS или флага -a
+    "base_url": "http://localhost", // аналог переменной окружения BASE_URL или флага -b
+    "file_storage_path": "/path/to/file.db", // аналог переменной окружения FILE_STORAGE_PATH или флага -f
+    "database_dsn": "", // аналог переменной окружения DATABASE_DSN или флага -d
+    "enable_https": true // аналог переменной окружения ENABLE_HTTPS или флага -s
+}
+*/
 type AppConfig struct {
-	ListenAddr           string `env:"SERVER_ADDRESS,default=localhost:8080" validate:"required,hostname_port"`
-	BaseURL              string `env:"BASE_URL,default=http://localhost:8080" validate:"required,base_url"`
-	StorageFilePath      string `env:"FILE_STORAGE_PATH,default=urls.gob" validate:"required"`
+	ListenAddr           string `env:"SERVER_ADDRESS,default=localhost:8080" validate:"required,hostname_port" json:"server_address"`
+	BaseURL              string `env:"BASE_URL,default=http://localhost:8080" validate:"required,base_url" json:"base_url"`
+	StorageFilePath      string `env:"FILE_STORAGE_PATH,default=urls.gob" validate:"required" json:"file_storage_path"`
 	SecretKey            string `env:"SECRET_KEY,default=change_me" validate:"required"`
-	DSN                  string `env:"DATABASE_DSN"`
+	DSN                  string `env:"DATABASE_DSN" json:"database_dsn"`
 	StorageFlushInterval time.Duration
-	Verbose              bool `env:"APP_VERBOSE,default=0"`
-	EnableHTTPS          bool `env:"ENABLE_HTTPS,default=0"`
+	Verbose              bool   `env:"APP_VERBOSE,default=0"`
+	EnableHTTPS          bool   `env:"ENABLE_HTTPS,default=0" json:"enable_https"`
+	ConfigFile           string `env:"CONFIG"`
 }
 
 // New constructor
@@ -39,6 +51,28 @@ func (c *AppConfig) Load() error {
 		return fmt.Errorf(".env load error: %w", err)
 	}
 
+	// load config
+	if err := envdecode.StrictDecode(c); err != nil {
+		return fmt.Errorf("env decode: %w", err)
+	}
+
+	// parse config related flags
+	pfc := pflag.NewFlagSet("config", pflag.ContinueOnError)
+	pfc.StringVarP(&c.ConfigFile, "config", "c", c.ConfigFile, "Config file")
+	_ = pfc.Parse(os.Args[1:])
+	pflag.CommandLine.AddFlagSet(pfc)
+
+	if c.ConfigFile != "" {
+		b, err := os.ReadFile(c.ConfigFile)
+		if err != nil {
+			return fmt.Errorf("config file read: %w", err)
+		}
+		if err = json.Unmarshal(b, c); err != nil {
+			return fmt.Errorf("config file parse: %w", err)
+		}
+	}
+
+	// load env one more time
 	if err := envdecode.StrictDecode(c); err != nil {
 		return fmt.Errorf("env decode: %w", err)
 	}
