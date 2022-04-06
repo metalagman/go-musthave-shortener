@@ -11,6 +11,7 @@ import (
 	"shortener/internal/app/config"
 	"shortener/internal/app/logger"
 	"shortener/pkg/version"
+	"syscall"
 )
 
 func main() {
@@ -18,7 +19,7 @@ func main() {
 
 	// Setting up signal capturing
 	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt)
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
