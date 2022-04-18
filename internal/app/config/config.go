@@ -36,6 +36,7 @@ type AppConfig struct {
 	Verbose              bool   `env:"APP_VERBOSE,default=0"`
 	EnableHTTPS          bool   `env:"ENABLE_HTTPS,default=0" json:"enable_https"`
 	ConfigFile           string `env:"CONFIG"`
+	TrustedNetwork       string `env:"TRUSTED_SUBNET" json:"trusted_network" validate:"cidr"`
 }
 
 // New constructor
@@ -83,6 +84,7 @@ func (c *AppConfig) Load() error {
 	pflag.StringVarP(&c.DSN, "dsn", "d", c.DSN, "Database connection DSN")
 	pflag.BoolVarP(&c.Verbose, "verbose", "v", c.Verbose, "Verbose output")
 	pflag.BoolVarP(&c.EnableHTTPS, "secure", "s", c.EnableHTTPS, "Enable HTTPS")
+	pflag.StringVarP(&c.TrustedNetwork, "trusted-network", "t", c.TrustedNetwork, "Trusted network")
 	pflag.Parse()
 
 	return nil
