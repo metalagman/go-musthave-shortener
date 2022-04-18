@@ -5,27 +5,20 @@ import (
 	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog/log"
-	"os"
 	"os/signal"
 	"shortener/internal/app"
 	"shortener/internal/app/config"
 	"shortener/internal/app/logger"
 	"shortener/pkg/version"
+	"syscall"
 )
 
 func main() {
 	fmt.Println(version.Print())
 
-	// Setting up signal capturing
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	go func() {
-		osCall := <-stop
-		log.Debug().Msgf("System call: %+v", osCall)
-		cancel()
-	}()
+	ctx := context.Background()
+	ctx, stop := signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+	defer stop()
 
 	c := config.New()
 	if err := c.Load(); err != nil {
