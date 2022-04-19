@@ -72,3 +72,12 @@ type Record struct {
 	OriginalURL   string
 	CorrelationID string
 }
+
+type StatProvider interface {
+	Stat() (StatData, error)
+}
+
+type StatData struct {
+	URLCount  int
+	UserCount int
+}
