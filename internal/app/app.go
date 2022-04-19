@@ -122,6 +122,7 @@ func (a *App) router() http.Handler {
 	r.With(mw.ContentTypeJSON).Post("/api/shorten", api.WriteHandler(a.store))
 	r.With(mw.ContentTypeJSON).Post("/api/shorten/batch", api.BatchWriteHandler(a.store))
 	r.With(mw.ContentTypeJSON).Delete("/api/user/urls", api.BatchRemoveHandler(a.store))
+	r.With(mw.ContentTypeJSON, mw.TrustedNetwork(a.config.TrustedNetwork)).Get("/api/internal/stats", api.StatHandler(a.store))
 	r.Get("/{id:[0-9a-z]+}", basic.ReadHandler(a.store))
 	r.Post("/", basic.WriteHandler(a.store))
 	r.Get("/ping", basic.PingHandler(a.store))

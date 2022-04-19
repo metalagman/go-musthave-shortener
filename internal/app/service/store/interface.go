@@ -74,7 +74,7 @@ type Record struct {
 }
 
 type StatProvider interface {
-	Stat() (StatData, error)
+	Stat() (*StatData, error)
 }
 
 type StatData struct {
