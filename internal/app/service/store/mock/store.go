@@ -71,20 +71,6 @@ func (m *MockStore) EXPECT() *MockStoreMockRecorder {
 	return m.recorder
 }
 
-// HealthCheck mocks base method.
-func (m *MockStore) HealthCheck() error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "HealthCheck")
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// HealthCheck indicates an expected call of HealthCheck.
-func (mr *MockStoreMockRecorder) HealthCheck() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HealthCheck", reflect.TypeOf((*MockStore)(nil).HealthCheck))
-}
-
 // ReadURL mocks base method.
 func (m *MockStore) ReadURL(id string) (string, error) {
 	m.ctrl.T.Helper()
@@ -320,4 +306,42 @@ func (mr *MockBatchRemoverMockRecorder) BatchRemove(uid interface{}, ids ...inte
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{uid}, ids...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchRemove", reflect.TypeOf((*MockBatchRemover)(nil).BatchRemove), varargs...)
+}
+
+// MockStatProvider is a mock of StatProvider interface.
+type MockStatProvider struct {
+	ctrl     *gomock.Controller
+	recorder *MockStatProviderMockRecorder
+}
+
+// MockStatProviderMockRecorder is the mock recorder for MockStatProvider.
+type MockStatProviderMockRecorder struct {
+	mock *MockStatProvider
+}
+
+// NewMockStatProvider creates a new mock instance.
+func NewMockStatProvider(ctrl *gomock.Controller) *MockStatProvider {
+	mock := &MockStatProvider{ctrl: ctrl}
+	mock.recorder = &MockStatProviderMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockStatProvider) EXPECT() *MockStatProviderMockRecorder {
+	return m.recorder
+}
+
+// Stat mocks base method.
+func (m *MockStatProvider) Stat() (*store.StatData, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Stat")
+	ret0, _ := ret[0].(*store.StatData)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Stat indicates an expected call of Stat.
+func (mr *MockStatProviderMockRecorder) Stat() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stat", reflect.TypeOf((*MockStatProvider)(nil).Stat))
 }

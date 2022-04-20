@@ -14,14 +14,17 @@ import (
 	"shortener/internal/app/handler/basic"
 	"shortener/internal/app/logger"
 	mw "shortener/internal/app/middleware"
+	"shortener/internal/app/service/grpcservice"
 	"shortener/internal/app/service/store/sqlstore"
 	"shortener/internal/migrate"
+	"shortener/internal/pkg/grpcserver"
 	"time"
 )
 
 type App struct {
 	config *config.AppConfig
 	store  *sqlstore.Store
+	grpc   *grpcserver.Server
 	log    logger.Logger
 }
 
@@ -47,10 +50,13 @@ func New(config *config.AppConfig, l logger.Logger) (*App, error) {
 		return nil, fmt.Errorf("store init: %w", err)
 	}
 
+	svc := grpcservice.NewShortenerService()
+
 	a := &App{
 		config: config,
 		store:  s,
 		log:    l,
+		grpc:   grpcserver.New(grpcserver.WithServiceInit(svc.Init())),
 	}
 
 	return a, nil
@@ -94,6 +100,8 @@ func (a *App) Serve(ctx context.Context) error {
 		return fmt.Errorf("store shutdown: %w", err)
 	}
 
+	a.grpc.Stop()
+
 	ctxShutdown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer func() {
 		cancel()
@@ -112,6 +120,7 @@ func (a *App) router() http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)
 	r.Use(mw.Log(a.log))
+	r.Use(a.grpc.Middleware())
 	r.Use(mw.SecureCookieAuth(a.config.SecretKey))
 	r.Use(mw.GzipResponseWriter)
 	r.Use(mw.GzipRequestReader)

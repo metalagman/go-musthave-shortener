@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+option go_package = "shortener/api/proto";
+
+package api;
+
+message ShortenRequest {
+  string url = 1;
+}
+
+message ShortenResponse {
+  string url = 1;
+}
+
+message BatchShortenRequest {
+}
+
+message BatchShortenResponse {
+
+}
+
+message ExpandRequest {
+
+}
+
+message ExpandResponse {
+
+}
+
+message BatchRemoveRequest {
+
+}
+
+message BatchRemoveResponse {
+
+}
+
+
+service Shortener {
+  rpc Shorten(ShortenRequest) returns (ShortenResponse);
+  rpc BatchShorten(BatchShortenRequest) returns (BatchShortenResponse);
+  rpc Expand(ExpandRequest) returns (ExpandResponse);
+  rpc BatchRemove(BatchRemoveRequest) returns (BatchRemoveResponse);
+}
