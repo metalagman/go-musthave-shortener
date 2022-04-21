@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"golang.org/x/crypto/acme/autocert"
+	"google.golang.org/grpc"
 	"net/http"
 	"net/http/pprof"
 	"shortener/internal/app/config"
@@ -17,14 +18,13 @@ import (
 	"shortener/internal/app/service/grpcservice"
 	"shortener/internal/app/service/store/sqlstore"
 	"shortener/internal/migrate"
-	"shortener/internal/pkg/grpcserver"
 	"time"
 )
 
 type App struct {
 	config *config.AppConfig
 	store  *sqlstore.Store
-	grpc   *grpcserver.Server
+	grpc   *grpcservice.Server
 	log    logger.Logger
 }
 
@@ -42,7 +42,7 @@ func New(config *config.AppConfig, l logger.Logger) (*App, error) {
 		return nil, fmt.Errorf("migrate up: %w", err)
 	}
 
-	s, err := sqlstore.New(
+	st, err := sqlstore.New(
 		db,
 		sqlstore.WithBaseURL(config.BaseURL),
 	)
@@ -50,14 +50,15 @@ func New(config *config.AppConfig, l logger.Logger) (*App, error) {
 		return nil, fmt.Errorf("store init: %w", err)
 	}
 
-	svc := grpcservice.NewShortenerService()
-
 	a := &App{
 		config: config,
-		store:  s,
+		store:  st,
 		log:    l,
-		grpc:   grpcserver.New(grpcserver.WithServiceInit(svc.Init())),
+		grpc:   grpcservice.New(grpc.UnaryInterceptor(grpcservice.UID())),
 	}
+
+	svc := grpcservice.NewShortenerService(st)
+	a.grpc.InitServices(svc.Init())
 
 	return a, nil
 }
@@ -120,7 +121,9 @@ func (a *App) router() http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)
 	r.Use(mw.Log(a.log))
+
 	r.Use(a.grpc.Middleware())
+
 	r.Use(mw.SecureCookieAuth(a.config.SecretKey))
 	r.Use(mw.GzipResponseWriter)
 	r.Use(mw.GzipRequestReader)

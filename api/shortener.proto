@@ -5,34 +5,58 @@ option go_package = "shortener/api/proto";
 package api;
 
 message ShortenRequest {
-  string url = 1;
+  string original_url = 1;
 }
 
 message ShortenResponse {
-  string url = 1;
+  string short_url = 1;
+}
+
+message BatchShortenRequestItem {
+  string correlation_id = 1;
+  string original_url = 2;
 }
 
 message BatchShortenRequest {
+  repeated BatchShortenRequestItem items = 1;
+}
+
+message BatchShortenResponseItem {
+  string correlation_id = 1;
+  string short_url = 2;
 }
 
 message BatchShortenResponse {
-
+  repeated BatchShortenResponseItem items = 1;
 }
 
 message ExpandRequest {
-
+  string id = 1;
 }
 
 message ExpandResponse {
-
+  string original_url = 1;
 }
 
 message BatchRemoveRequest {
-
+  repeated string ids = 1;
 }
 
 message BatchRemoveResponse {
 
+}
+
+message UserDataRequest {
+
+}
+
+message UserDataResponse {
+  repeated UserDataResponseItem items = 1;
+}
+
+message UserDataResponseItem {
+  string original_url = 1;
+  string short_url = 2;
 }
 
 
@@ -41,4 +65,5 @@ service Shortener {
   rpc BatchShorten(BatchShortenRequest) returns (BatchShortenResponse);
   rpc Expand(ExpandRequest) returns (ExpandResponse);
   rpc BatchRemove(BatchRemoveRequest) returns (BatchRemoveResponse);
+  rpc UserData(UserDataRequest) returns (UserDataResponse);
 }

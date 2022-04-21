@@ -1,4 +1,4 @@
-package grpcserver
+package grpcservice
 
 import (
 	"google.golang.org/grpc"
@@ -12,25 +12,16 @@ type Server struct {
 
 type ServiceInit func(grpc.ServiceRegistrar)
 
-type ServerParam func(*Server)
-
-func WithServiceInit(init ...ServiceInit) ServerParam {
-	return func(s *Server) {
-		for _, f := range init {
-			f(s.server)
-		}
-	}
+func New(opts ...grpc.ServerOption) *Server {
+	s := &Server{}
+	s.server = grpc.NewServer(opts...)
+	return s
 }
 
-func New(params ...ServerParam) *Server {
-	s := &Server{}
-	s.server = grpc.NewServer()
-
-	for _, param := range params {
-		param(s)
+func (s *Server) InitServices(init ...ServiceInit) {
+	for _, f := range init {
+		f(s.server)
 	}
-
-	return s
 }
 
 func (s *Server) Middleware() func(next http.Handler) http.Handler {

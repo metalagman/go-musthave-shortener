@@ -36,7 +36,7 @@ type AppConfig struct {
 	Verbose              bool   `env:"APP_VERBOSE,default=0"`
 	EnableHTTPS          bool   `env:"ENABLE_HTTPS,default=0" json:"enable_https"`
 	ConfigFile           string `env:"CONFIG"`
-	TrustedNetwork       string `env:"TRUSTED_SUBNET" json:"trusted_network" validate:"cidr"`
+	TrustedNetwork       string `env:"TRUSTED_SUBNET,default=127.0.0.0/8" json:"trusted_network" validate:"cidr"`
 }
 
 // New constructor

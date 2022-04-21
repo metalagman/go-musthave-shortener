@@ -35,6 +35,8 @@ type HealthChecker interface {
 type Store interface {
 	Reader
 	Writer
+	BatchWriter
+	BatchRemover
 	UserDataReader
 }
 

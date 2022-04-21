@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"shortener/internal/app/service/store"
 	"sync"
 	"time"
 )
@@ -25,6 +26,16 @@ type Store struct {
 	dbFlushInterval time.Duration
 	dbFlushCh       chan struct{}
 	dbFlushTicker   *time.Ticker
+}
+
+func (s *Store) BatchWrite(uid string, in []store.Record) ([]store.Record, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *Store) BatchRemove(uid string, ids ...string) error {
+	//TODO implement me
+	panic("implement me")
 }
 
 type db map[uint64]dbRow
