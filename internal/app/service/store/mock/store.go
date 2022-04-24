@@ -71,18 +71,38 @@ func (m *MockStore) EXPECT() *MockStoreMockRecorder {
 	return m.recorder
 }
 
-// HealthCheck mocks base method.
-func (m *MockStore) HealthCheck() error {
+// BatchRemove mocks base method.
+func (m *MockStore) BatchRemove(uid string, ids ...string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "HealthCheck")
+	varargs := []interface{}{uid}
+	for _, a := range ids {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "BatchRemove", varargs...)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// HealthCheck indicates an expected call of HealthCheck.
-func (mr *MockStoreMockRecorder) HealthCheck() *gomock.Call {
+// BatchRemove indicates an expected call of BatchRemove.
+func (mr *MockStoreMockRecorder) BatchRemove(uid interface{}, ids ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HealthCheck", reflect.TypeOf((*MockStore)(nil).HealthCheck))
+	varargs := append([]interface{}{uid}, ids...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchRemove", reflect.TypeOf((*MockStore)(nil).BatchRemove), varargs...)
+}
+
+// BatchWrite mocks base method.
+func (m *MockStore) BatchWrite(uid string, in []store.Record) ([]store.Record, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BatchWrite", uid, in)
+	ret0, _ := ret[0].([]store.Record)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BatchWrite indicates an expected call of BatchWrite.
+func (mr *MockStoreMockRecorder) BatchWrite(uid, in interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchWrite", reflect.TypeOf((*MockStore)(nil).BatchWrite), uid, in)
 }
 
 // ReadURL mocks base method.
@@ -320,4 +340,42 @@ func (mr *MockBatchRemoverMockRecorder) BatchRemove(uid interface{}, ids ...inte
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{uid}, ids...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchRemove", reflect.TypeOf((*MockBatchRemover)(nil).BatchRemove), varargs...)
+}
+
+// MockStatProvider is a mock of StatProvider interface.
+type MockStatProvider struct {
+	ctrl     *gomock.Controller
+	recorder *MockStatProviderMockRecorder
+}
+
+// MockStatProviderMockRecorder is the mock recorder for MockStatProvider.
+type MockStatProviderMockRecorder struct {
+	mock *MockStatProvider
+}
+
+// NewMockStatProvider creates a new mock instance.
+func NewMockStatProvider(ctrl *gomock.Controller) *MockStatProvider {
+	mock := &MockStatProvider{ctrl: ctrl}
+	mock.recorder = &MockStatProviderMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockStatProvider) EXPECT() *MockStatProviderMockRecorder {
+	return m.recorder
+}
+
+// Stat mocks base method.
+func (m *MockStatProvider) Stat() (*store.StatData, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Stat")
+	ret0, _ := ret[0].(*store.StatData)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Stat indicates an expected call of Stat.
+func (mr *MockStatProviderMockRecorder) Stat() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stat", reflect.TypeOf((*MockStatProvider)(nil).Stat))
 }

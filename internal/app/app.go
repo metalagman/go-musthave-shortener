@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"golang.org/x/crypto/acme/autocert"
+	"google.golang.org/grpc"
 	"net/http"
 	"net/http/pprof"
 	"shortener/internal/app/config"
@@ -14,6 +15,7 @@ import (
 	"shortener/internal/app/handler/basic"
 	"shortener/internal/app/logger"
 	mw "shortener/internal/app/middleware"
+	"shortener/internal/app/service/grpcservice"
 	"shortener/internal/app/service/store/sqlstore"
 	"shortener/internal/migrate"
 	"time"
@@ -22,6 +24,7 @@ import (
 type App struct {
 	config *config.AppConfig
 	store  *sqlstore.Store
+	grpc   *grpcservice.Server
 	log    logger.Logger
 }
 
@@ -39,7 +42,7 @@ func New(config *config.AppConfig, l logger.Logger) (*App, error) {
 		return nil, fmt.Errorf("migrate up: %w", err)
 	}
 
-	s, err := sqlstore.New(
+	st, err := sqlstore.New(
 		db,
 		sqlstore.WithBaseURL(config.BaseURL),
 	)
@@ -49,9 +52,13 @@ func New(config *config.AppConfig, l logger.Logger) (*App, error) {
 
 	a := &App{
 		config: config,
-		store:  s,
+		store:  st,
 		log:    l,
+		grpc:   grpcservice.New(grpc.UnaryInterceptor(grpcservice.UID())),
 	}
+
+	svc := grpcservice.NewShortenerService(st)
+	a.grpc.InitServices(svc.Init())
 
 	return a, nil
 }
@@ -94,6 +101,8 @@ func (a *App) Serve(ctx context.Context) error {
 		return fmt.Errorf("store shutdown: %w", err)
 	}
 
+	a.grpc.Stop()
+
 	ctxShutdown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer func() {
 		cancel()
@@ -112,6 +121,9 @@ func (a *App) router() http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)
 	r.Use(mw.Log(a.log))
+
+	r.Use(a.grpc.Middleware())
+
 	r.Use(mw.SecureCookieAuth(a.config.SecretKey))
 	r.Use(mw.GzipResponseWriter)
 	r.Use(mw.GzipRequestReader)
@@ -122,6 +134,7 @@ func (a *App) router() http.Handler {
 	r.With(mw.ContentTypeJSON).Post("/api/shorten", api.WriteHandler(a.store))
 	r.With(mw.ContentTypeJSON).Post("/api/shorten/batch", api.BatchWriteHandler(a.store))
 	r.With(mw.ContentTypeJSON).Delete("/api/user/urls", api.BatchRemoveHandler(a.store))
+	r.With(mw.ContentTypeJSON, mw.TrustedNetwork(a.config.TrustedNetwork)).Get("/api/internal/stats", api.StatHandler(a.store))
 	r.Get("/{id:[0-9a-z]+}", basic.ReadHandler(a.store))
 	r.Post("/", basic.WriteHandler(a.store))
 	r.Get("/ping", basic.PingHandler(a.store))

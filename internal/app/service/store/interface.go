@@ -35,6 +35,8 @@ type HealthChecker interface {
 type Store interface {
 	Reader
 	Writer
+	BatchWriter
+	BatchRemover
 	UserDataReader
 }
 
@@ -71,4 +73,13 @@ type Record struct {
 	ShortURL      string
 	OriginalURL   string
 	CorrelationID string
+}
+
+type StatProvider interface {
+	Stat() (*StatData, error)
+}
+
+type StatData struct {
+	URLCount  int
+	UserCount int
 }
